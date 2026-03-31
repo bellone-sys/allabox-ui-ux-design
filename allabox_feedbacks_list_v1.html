@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allabox — Feedbacks v1</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f4;
+    --color-background-tertiary: #eeece9;
+    --color-text-primary: #1a1a19;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --color-accent-blue: #185FA5;
+    --color-accent-blue-light: #E6F1FB;
+    --color-accent-blue-dark: #0C447C;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --row-height: 54px;
+  }
+
+  /* ── Dark mode ── */
+  @media (prefers-color-scheme: dark) {
+    body { background: #333330; color: #f0ede8; }
+    .step-card { background: #1e1e1c; border-color: rgba(255,255,255,0.10); }
+    .modal { background: #1e1e1c; border-color: rgba(255,255,255,0.10); }
+    .modal-header { border-bottom-color: rgba(255,255,255,0.10); }
+    .modal-footer { border-top-color: rgba(255,255,255,0.10); }
+    .modal-title { color: #f0ede8; }
+    .btn-ghost { color: #b4b2a9; border-color: rgba(255,255,255,0.22); }
+    .btn-ghost:hover { background: #2a2a28; }
+    .filter-label { color: #b4b2a9; }
+    .filter-select, .controls-select, .search-input { background: #1e1e1c; color: #f0ede8; border-color: rgba(255,255,255,0.22); }
+    .date-range-btn { border-color: rgba(255,255,255,0.22); color: #b4b2a9; background: #1e1e1c; }
+    .icon-btn, .sort-dir-btn { background: #2a2a28; border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .icon-btn:hover, .sort-dir-btn:hover { background: #333330; }
+    .controls-count, .pagination-info { color: #888780; }
+    .feedback-table-wrap { border-color: rgba(255,255,255,0.10); }
+    .feedback-table-head { background: #222220; border-bottom-color: rgba(255,255,255,0.10); color: #888780; }
+    .th-sort { color: #888780; }
+    .th-sort:hover { color: #b4b2a9; background: rgba(255,255,255,0.05); }
+    .th-sort.active { color: #85B7EB; }
+    .feedback-row { border-bottom-color: rgba(255,255,255,0.08); }
+    .feedback-row:nth-child(even) { background: #222220; }
+    .feedback-row:hover { background: #2a2a28; }
+    .col-vettore-name, .row-date { color: #f0ede8; }
+    .row-time, .rating-number, .col-anteprima { color: #888780; }
+    .action-icon-btn { color: #888780; }
+    .action-icon-btn:hover { color: #85B7EB; background: #042C53; }
+    .col-chevron svg { color: #888780; }
+    .pager-btn { background: #1e1e1c; border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .pager-btn:hover:not(:disabled) { background: #2a2a28; }
+    .pager-btn.active { background: #185FA5; border-color: transparent; color: #fff; }
+    .pager-btn:disabled { opacity: 0.35; }
+    .qa-item { border-bottom-color: rgba(255,255,255,0.08); }
+    .qa-question { color: #888780; }
+    .qa-answer { color: #f0ede8; }
+    .empty-state { color: #888780; }
+    .search-input::placeholder { color: #888780; }
+    .carrier-badge { background: #0C447C; color: #E6F1FB; }
+    .sort-dir-btn.asc svg { transform: scaleY(-1); }
+  }
+
+  /* ── Base ── */
+  body { font-family: var(--font-sans); background: var(--color-background-tertiary); color: var(--color-text-primary); padding: 2rem 1rem; min-height: 100vh; }
+  .page-wrapper { max-width: 1200px; margin: 0 auto; }
+
+  /* ── Page header ── */
+  .page-header { margin-bottom: 16px; }
+  .page-title { font-size: 13px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 2px; }
+  .page-heading { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+
+  /* ── Filter panel ── */
+  .step-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; margin-bottom: 12px; }
+  .filter-body { padding: 16px 20px; display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+  .filter-group { display: flex; flex-direction: column; gap: 5px; min-width: 150px; flex: 1; }
+  .filter-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
+  .filter-select {
+    height: 36px; padding: 0 30px 0 12px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px;
+    font-size: 13px; color: var(--color-text-primary); background: #fff; appearance: none; outline: none; cursor: pointer; width: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23888780' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center; transition: border-color .15s;
+  }
+  .filter-select:focus { border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,.12); }
+  .filter-clear-btn {
+    height: 36px; padding: 0 16px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22);
+    background: transparent; font-size: 13px; color: var(--color-text-secondary); cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: background .15s; align-self: flex-end;
+  }
+  .filter-clear-btn:hover { background: var(--color-background-secondary); }
+
+  /* ── Controls bar ── */
+  .controls-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+  .controls-count { font-size: 13px; color: var(--color-text-secondary); font-style: italic; }
+  .controls-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .icon-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22);
+    background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--color-text-secondary); transition: background .15s; flex-shrink: 0;
+  }
+  .icon-btn:hover { background: var(--color-background-tertiary); }
+  .icon-btn.spinning svg { animation: spin .6s linear; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .controls-select {
+    height: 32px; padding: 0 26px 0 10px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px;
+    font-size: 12px; color: var(--color-text-primary); background: var(--color-background-secondary);
+    appearance: none; outline: none; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23888780' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center; transition: border-color .15s;
+  }
+  .controls-select:focus { border-color: #378ADD; }
+  .sort-wrap { display: flex; align-items: center; gap: 4px; }
+  .sort-dir-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22);
+    background: var(--color-background-secondary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--color-text-secondary); transition: background .15s, color .15s; flex-shrink: 0;
+  }
+  .sort-dir-btn:hover { background: var(--color-background-tertiary); }
+  .sort-dir-btn.asc svg { transform: scaleY(-1); }
+  .date-range-btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+    border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; font-size: 12px;
+    color: var(--color-text-secondary); background: var(--color-background-secondary);
+    cursor: pointer; white-space: nowrap; transition: background .15s;
+  }
+  .date-range-btn:hover { background: var(--color-background-tertiary); }
+  .search-wrap { position: relative; }
+  .search-icon { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--color-text-tertiary); pointer-events: none; }
+  .search-input {
+    height: 32px; width: 180px; padding: 0 10px 0 32px; border: 0.5px solid rgba(0,0,0,0.22);
+    border-radius: 8px; font-size: 12px; color: var(--color-text-primary);
+    background: var(--color-background-secondary); outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  .search-input:focus { border-color: #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,.12); background: #fff; }
+  .search-input::placeholder { color: var(--color-text-tertiary); }
+
+  /* ── Feedback table ── */
+  .feedback-table-wrap { background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; overflow: hidden; margin-bottom: 12px; }
+  .feedback-table-head {
+    display: grid;
+    grid-template-columns: 48px 140px 160px 130px 1fr 72px 36px;
+    align-items: center; padding: 0 16px; height: 36px;
+    border-bottom: 0.5px solid rgba(0,0,0,0.12);
+    background: var(--color-background-secondary);
+  }
+  .th-sort {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10px; font-weight: 500; color: var(--color-text-tertiary);
+    letter-spacing: .06em; text-transform: uppercase;
+    cursor: pointer; padding: 4px 6px; border-radius: 5px;
+    transition: background .12s, color .12s; user-select: none; white-space: nowrap;
+  }
+  .th-sort:hover { background: rgba(0,0,0,0.04); color: var(--color-text-secondary); }
+  .th-sort.active { color: var(--color-accent-blue); }
+  .th-sort .sort-arrow { opacity: 0; transition: opacity .12s; font-size: 9px; }
+  .th-sort:hover .sort-arrow, .th-sort.active .sort-arrow { opacity: 1; }
+  .th-plain { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: .06em; text-transform: uppercase; padding: 4px 6px; }
+  .feedback-row {
+    display: grid;
+    grid-template-columns: 48px 140px 160px 130px 1fr 72px 36px;
+    align-items: center; padding: 0 16px; height: var(--row-height);
+    border-bottom: 0.5px solid rgba(0,0,0,0.12); cursor: pointer; transition: background .1s;
+  }
+  .feedback-row:last-child { border-bottom: none; }
+  .feedback-row:nth-child(even) { background: #fafaf9; }
+  .feedback-row:hover { background: #f0ede9; }
+
+  /* ── Row cells ── */
+  /* Client avatar */
+  .client-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0; cursor: default;
+    position: relative;
+  }
+  .client-avatar[title]:hover::after {
+    content: attr(title); position: absolute; bottom: calc(100% + 6px); left: 50%;
+    transform: translateX(-50%); background: #1a1a19; color: #fff; font-size: 11px;
+    font-weight: 400; padding: 4px 8px; border-radius: 6px; white-space: nowrap;
+    pointer-events: none; z-index: 10; font-family: var(--font-sans);
+  }
+
+  /* Carrier chip in column */
+  .carrier-chip { display: inline-flex; align-items: center; gap: 6px; overflow: hidden; }
+  .carrier-icon {
+    width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; font-weight: 800; letter-spacing: .01em; line-height: 1;
+  }
+  .col-vettore-name { font-size: 13px; color: var(--color-text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .row-date { font-size: 13px; font-weight: 500; color: var(--color-text-primary); display: block; }
+  .row-time { font-size: 11px; color: var(--color-text-tertiary); display: block; margin-top: 1px; }
+  .col-valutazione { display: flex; align-items: center; gap: 5px; }
+  .stars-inline { font-size: 13px; letter-spacing: 1px; line-height: 1; }
+  .rating-number { font-size: 12px; color: var(--color-text-secondary); }
+  .col-anteprima { font-size: 13px; color: var(--color-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; }
+
+  /* Minimal action icons */
+  .col-azioni { display: flex; align-items: center; gap: 2px; }
+  .action-icon-btn {
+    width: 28px; height: 28px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;
+    color: var(--color-text-tertiary); text-decoration: none; transition: color .12s, background .12s; cursor: pointer;
+  }
+  .action-icon-btn:hover { color: var(--color-accent-blue); background: var(--color-accent-blue-light); }
+
+  .col-chevron { display: flex; align-items: center; justify-content: flex-end; color: var(--color-text-tertiary); }
+  .feedback-row:hover .col-chevron { color: var(--color-text-secondary); }
+  .empty-state { padding: 40px; text-align: center; font-size: 13px; color: var(--color-text-tertiary); font-style: italic; }
+
+  /* ── Pagination ── */
+  .pagination-bar { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 8px; flex-wrap: wrap; gap: 8px; }
+  .pagination-info { font-size: 12px; color: var(--color-text-tertiary); }
+  .pagination-buttons { display: flex; align-items: center; gap: 4px; }
+  .pager-btn {
+    height: 30px; min-width: 30px; padding: 0 8px; border: 0.5px solid rgba(0,0,0,0.22);
+    border-radius: 6px; font-size: 12px; background: #fff; color: var(--color-text-secondary);
+    cursor: pointer; transition: background .12s; display: flex; align-items: center; justify-content: center;
+  }
+  .pager-btn:hover:not(:disabled) { background: var(--color-background-secondary); }
+  .pager-btn.active { background: var(--color-accent-blue); color: #fff; border-color: transparent; }
+  .pager-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* ── Modal ── */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #ffffff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.12); width: 520px; max-width: 96vw; }
+  .modal-header { padding: 16px 24px; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .modal-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); text-align: center; margin-bottom: 14px; }
+  .modal-carrier-row { display: flex; align-items: center; justify-content: space-between; }
+  .carrier-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; }
+  .stars-lg-wrap { display: flex; align-items: center; gap: 6px; }
+  .stars-lg { font-size: 20px; letter-spacing: 2px; line-height: 1; }
+  .rating-lg { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+  .modal-body { padding: 20px 24px; }
+  .qa-list { display: flex; flex-direction: column; }
+  .qa-item { padding: 14px 0; border-bottom: 0.5px solid rgba(0,0,0,0.08); }
+  .qa-item:last-child { border-bottom: none; }
+  .qa-question { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 5px; }
+  .qa-answer { font-size: 14px; color: var(--color-text-primary); font-weight: 500; }
+  .modal-footer { padding: 14px 24px; border-top: 0.5px solid rgba(0,0,0,0.12); display: flex; justify-content: center; }
+  .btn-ghost { height: 36px; padding: 0 20px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; font-size: 13px; color: var(--color-text-secondary); cursor: pointer; transition: background .15s; }
+  .btn-ghost:hover { background: var(--color-background-secondary); }
+
+  /* ── AI Summary Widget ── */
+  .ai-widget {
+    background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 12px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .ai-widget-icon {
+    width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg, #6B5CE7 0%, #378ADD 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ai-widget-body { flex: 1; min-width: 0; }
+  .ai-widget-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: #6B5CE7; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;
+  }
+  .ai-widget-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.55; }
+  .ai-widget-text strong { color: var(--color-text-primary); font-weight: 500; }
+  .ai-widget-stats {
+    display: flex; align-items: center; gap: 16px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .ai-stat { display: flex; align-items: center; gap: 5px; }
+  .ai-stat-value { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
+  .ai-stat-label { font-size: 11px; color: var(--color-text-tertiary); }
+  .ai-stat-sep { width: 1px; height: 20px; background: rgba(0,0,0,0.10); }
+  .ai-rating-bar-wrap { display: flex; align-items: center; gap: 6px; }
+  .ai-rating-bar { height: 4px; border-radius: 2px; background: var(--color-background-tertiary); overflow: hidden; width: 60px; }
+  .ai-rating-bar-fill { height: 100%; border-radius: 2px; background: #F5A623; }
+  @media (prefers-color-scheme: dark) {
+    .ai-widget { background: #1e1e1c; border-color: rgba(255,255,255,0.10); }
+    .ai-widget-text { color: #b4b2a9; }
+    .ai-widget-text strong { color: #f0ede8; }
+    .ai-stat-value { color: #f0ede8; }
+    .ai-stat-sep { background: rgba(255,255,255,0.10); }
+    .ai-rating-bar { background: #2a2a28; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 920px) {
+    .feedback-table-head, .feedback-row { grid-template-columns: 48px 130px 150px 120px 72px 36px; }
+    .col-anteprima { display: none; }
+  }
+  @media (max-width: 640px) {
+    .feedback-table-head, .feedback-row { grid-template-columns: 48px 1fr 110px 72px 36px; }
+    .col-vettore { display: none; }
+    .row-time { display: none; }
+    .search-input { width: 130px; }
+  }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <p class="page-title">AllaBox Senders</p>
+    <h1 class="page-heading">Feedbacks</h1>
+  </div>
+
+  <!-- AI Summary Widget -->
+  <div class="ai-widget">
+    <div class="ai-widget-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 1.5l.9 2.6H12l-2.5 1.8.9 2.7L8 7l-2.4 1.6.9-2.7L4 4.1h3.1z" fill="white" opacity=".9"/>
+        <path d="M3.5 9.5l.5 1.5H5.5l-1.3 1 .5 1.5-1.2-.9-1.2.9.5-1.5-1.3-1H3z" fill="white" opacity=".6"/>
+        <path d="M12 9l.4 1.1H13.5l-1 .7.4 1.1-.9-.7-.9.7.4-1.1-1-.7H11.6z" fill="white" opacity=".6"/>
+      </svg>
+    </div>
+    <div class="ai-widget-body">
+      <div class="ai-widget-label">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l.9 2.6H12l-2.5 1.8.9 2.7L8 7l-2.4 1.6.9-2.7L4 4.1h3.1z" fill="currentColor"/></svg>
+        Sintesi AI · periodo 28 feb – 31 mar 2026
+      </div>
+      <div class="ai-widget-text">
+        <strong>La maggior parte dei clienti è soddisfatta</strong>: il 70% delle recensioni è a 4–5 stelle.
+        <strong>Poste Italiane, DHL e FedEx</strong> raccolgono valutazioni costantemente positive.
+        Si segnalano <strong>criticità ricorrenti con BRT</strong>: ritardi e un caso di pacco danneggiato.
+        Nexive ha ricevuto la valutazione più bassa per mancata consegna senza preavviso.
+      </div>
+      <div class="ai-widget-stats">
+        <div class="ai-stat">
+          <span class="ai-stat-value">4.3</span>
+          <span style="color:#F5A623;font-size:13px">★</span>
+          <span class="ai-stat-label">media</span>
+        </div>
+        <div class="ai-stat-sep"></div>
+        <div class="ai-stat">
+          <span class="ai-stat-value">10</span>
+          <span class="ai-stat-label">recensioni</span>
+        </div>
+        <div class="ai-stat-sep"></div>
+        <div class="ai-stat" style="flex-direction:column;align-items:flex-start;gap:3px">
+          <span class="ai-stat-label" style="margin-bottom:1px">Distribuzione stelle</span>
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <div class="ai-rating-bar-wrap"><span style="font-size:10px;color:#888780;width:8px">5</span><div class="ai-rating-bar"><div class="ai-rating-bar-fill" style="width:60%"></div></div><span style="font-size:10px;color:#888780">6</span></div>
+            <div class="ai-rating-bar-wrap"><span style="font-size:10px;color:#888780;width:8px">4</span><div class="ai-rating-bar"><div class="ai-rating-bar-fill" style="width:20%"></div></div><span style="font-size:10px;color:#888780">2</span></div>
+            <div class="ai-rating-bar-wrap"><span style="font-size:10px;color:#888780;width:8px">3</span><div class="ai-rating-bar"><div class="ai-rating-bar-fill" style="width:10%;background:#F0C040"></div></div><span style="font-size:10px;color:#888780">1</span></div>
+            <div class="ai-rating-bar-wrap"><span style="font-size:10px;color:#888780;width:8px">2</span><div class="ai-rating-bar"><div class="ai-rating-bar-fill" style="width:10%;background:#E07A2F"></div></div><span style="font-size:10px;color:#888780">1</span></div>
+            <div class="ai-rating-bar-wrap"><span style="font-size:10px;color:#888780;width:8px">1</span><div class="ai-rating-bar"><div class="ai-rating-bar-fill" style="width:10%;background:#E24B4A"></div></div><span style="font-size:10px;color:#888780">1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter panel -->
+  <div class="step-card">
+    <div class="filter-body">
+      <div class="filter-group">
+        <span class="filter-label">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 14c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          Cliente
+        </span>
+        <select class="filter-select" id="filter-cliente" onchange="applyFilters()">
+          <option value="">Seleziona</option>
+          <option>Rossi Abbigliamento</option>
+          <option>Tech Store Milano</option>
+          <option>Profumeria Bella</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="14" height="8" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 5V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="1.4"/></svg>
+          Vettori
+        </span>
+        <select class="filter-select" id="filter-vettore" onchange="applyFilters()">
+          <option value="">Seleziona</option>
+          <option>Poste Italiane</option>
+          <option>GLS</option>
+          <option>DHL Express</option>
+          <option>BRT</option>
+          <option>UPS</option>
+          <option>Nexive</option>
+          <option>FedEx</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.5 4.5H14l-3.7 2.7 1.4 4.3L8 11l-3.7 2.5 1.4-4.3L2 6.5h4.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Valutazione
+        </span>
+        <select class="filter-select" id="filter-valutazione" onchange="applyFilters()">
+          <option value="">Seleziona</option>
+          <option value="5">★★★★★ 5 stelle</option>
+          <option value="4">★★★★☆ 4 stelle</option>
+          <option value="3">★★★☆☆ 3 stelle</option>
+          <option value="2">★★☆☆☆ 2 stelle</option>
+          <option value="1">★☆☆☆☆ 1 stella</option>
+        </select>
+      </div>
+      <button class="filter-clear-btn" onclick="clearFilters()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Pulisci
+      </button>
+    </div>
+  </div>
+
+  <!-- Controls bar -->
+  <div class="controls-bar">
+    <span class="controls-count" id="controls-count">10 Elementi | 1 Pagina</span>
+    <div class="controls-right">
+      <button class="icon-btn" id="reload-btn" title="Ricarica" onclick="simulateReload()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M2.5 8a5.5 5.5 0 1 1 1.1 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M2.5 11.5V8H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <select class="controls-select" id="per-page" onchange="onPerPageChange()">
+        <option>10</option><option>25</option><option>50</option>
+      </select>
+      <div class="sort-wrap">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" style="color:var(--color-text-tertiary);flex-shrink:0"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <select class="controls-select" id="sort-by" onchange="applyFilters()">
+          <option value="date">Data</option>
+          <option value="rating">Valutazione</option>
+        </select>
+        <button class="sort-dir-btn" id="sort-dir-btn" title="Inverti ordine" onclick="toggleSortDir()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M5 6L8 3l3 3M5 10l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <button class="date-range-btn">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 1v3M11 1v3M2 7h12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        28-02-2026 al 31-03-2026
+      </button>
+      <div class="search-wrap">
+        <svg class="search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <input type="text" class="search-input" id="search-input" placeholder="Cerca…" oninput="applyFilters()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback table -->
+  <div class="feedback-table-wrap">
+    <div class="feedback-table-head">
+      <div></div>
+      <div class="th-sort active" onclick="setSort('date')" id="th-date">
+        Data / Ora <span class="sort-arrow" id="arrow-date">↓</span>
+      </div>
+      <div class="th-plain">Vettore</div>
+      <div class="th-sort" onclick="setSort('rating')" id="th-rating">
+        Valutazione <span class="sort-arrow" id="arrow-rating">↓</span>
+      </div>
+      <div class="th-plain">Anteprima risposta</div>
+      <div class="th-plain">Azioni</div>
+      <div></div>
+    </div>
+    <div id="feedback-list"></div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-bar">
+    <span class="pagination-info" id="pagination-info">1–10 di 10</span>
+    <div class="pagination-buttons" id="pagination-buttons"></div>
+  </div>
+
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="detail-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Feedback</div>
+      <div class="modal-carrier-row">
+        <div class="carrier-badge" id="modal-carrier-badge">
+          <div class="carrier-icon" id="modal-carrier-icon"></div>
+          <span id="modal-carrier-name">—</span>
+        </div>
+        <div class="stars-lg-wrap">
+          <span class="stars-lg" id="modal-stars-lg">★★★★★</span>
+          <span class="rating-lg" id="modal-rating-lg">5.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="qa-list" id="modal-qa-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" style="min-width:120px" onclick="closeDetail()">Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Carrier config ── */
+const carriers = {
+  'Poste Italiane': { abbr:'PI',  color:'#fff',    bg:'#cc1011' },
+  'GLS':            { abbr:'GLS', color:'#fff',    bg:'#E07A2F' },
+  'DHL Express':    { abbr:'DHL', color:'#C8101E', bg:'#FECC00' },
+  'BRT':            { abbr:'BRT', color:'#fff',    bg:'#e30613' },
+  'UPS':            { abbr:'UPS', color:'#fff',    bg:'#351C15' },
+  'Nexive':         { abbr:'NX',  color:'#fff',    bg:'#2D7A3A' },
+  'FedEx':          { abbr:'FX',  color:'#fff',    bg:'#4D148C' },
+};
+
+function carrierIconHtml(vettore, size) {
+  const c = carriers[vettore] || { abbr: vettore.slice(0,2).toUpperCase(), color:'#fff', bg:'#888780' };
+  const s = size === 'lg' ? 28 : 22;
+  const fs = size === 'lg' ? 9 : 7;
+  return `<div class="carrier-icon" style="width:${s}px;height:${s}px;font-size:${fs}px;background:${c.bg};color:${c.color};border-radius:${size==='lg'?6:4}px">${c.abbr}</div>`;
+}
+
+/* ── Client config ── */
+const clientiMap = {
+  'Rossi Abbigliamento': { initials:'RA', color:'#0C447C', bg:'#E6F1FB' },
+  'Tech Store Milano':   { initials:'TS', color:'#0F6E56', bg:'#E1F5EE' },
+  'Profumeria Bella':    { initials:'PB', color:'#7C3985', bg:'#F3E8F7' },
+};
+
+/* ── Sample data ── */
+const feedbackData = [
+  { id:1,  dateStr:'30 Mar 2026', time:'17:55', cliente:'Rossi Abbigliamento', vettore:'Poste Italiane', rating:5,
+    anteprima:'Sì, prima del previsto',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Sì, prima del previsto' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Perfette' }, { q:'Il corriere è stato cordiale e professionale?', a:'Sì' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Sì, informazioni complete e puntuali' } ]
+  },
+  { id:2,  dateStr:'26 Mar 2026', time:'20:20', cliente:'Tech Store Milano',   vettore:'GLS',            rating:5,
+    anteprima:'Consegnato nei tempi, tutto ok',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Sì, nella finestra oraria' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Tutto integro' }, { q:'Il corriere è stato cordiale e professionale?', a:'Sì, molto cordiale' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Sì, notifiche precise' } ]
+  },
+  { id:3,  dateStr:'26 Mar 2026', time:'17:01', cliente:'Profumeria Bella',    vettore:'DHL Express',    rating:5,
+    anteprima:'Consegnato prima del previsto',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Consegnato prima del previsto' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Perfetto' }, { q:'Il corriere è stato cordiale e professionale?', a:'Eccellente' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Sì, senza dubbio' } ]
+  },
+  { id:4,  dateStr:'26 Mar 2026', time:'15:38', cliente:'Rossi Abbigliamento', vettore:'BRT',            rating:4,
+    anteprima:'Puntuale, imballaggio ottimo',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Sì, puntuale' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Imballaggio ottimo' }, { q:'Il corriere è stato cordiale e professionale?', a:'Nella norma' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Sì' } ]
+  },
+  { id:5,  dateStr:'25 Mar 2026', time:'11:02', cliente:'Tech Store Milano',   vettore:'BRT',            rating:3,
+    anteprima:'Ritardo di un giorno',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Ritardo di un giorno' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Sì, intatto' }, { q:'Il corriere è stato cordiale e professionale?', a:'Nella norma' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Forse' } ]
+  },
+  { id:6,  dateStr:'23 Mar 2026', time:'09:15', cliente:'Profumeria Bella',    vettore:'UPS',            rating:4,
+    anteprima:'Tutto regolare, puntuale',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Tutto regolare, puntuale' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Sì' }, { q:'Il corriere è stato cordiale e professionale?', a:'Molto disponibile' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Sì' } ]
+  },
+  { id:7,  dateStr:'20 Mar 2026', time:'08:55', cliente:'Rossi Abbigliamento', vettore:'Nexive',         rating:2,
+    anteprima:'Tentativo fallito, nessun avviso',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'No, tentativo fallito senza avviso' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Alla fine sì' }, { q:'Il corriere è stato cordiale e professionale?', a:'Non si è presentato' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'No' } ]
+  },
+  { id:8,  dateStr:'18 Mar 2026', time:'13:10', cliente:'Tech Store Milano',   vettore:'Poste Italiane', rating:5,
+    anteprima:'Eccellente, rapido e preciso',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Eccellente, rapido e preciso' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Perfetto' }, { q:'Il corriere è stato cordiale e professionale?', a:'Ottimo' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Certamente' } ]
+  },
+  { id:9,  dateStr:'14 Mar 2026', time:'16:48', cliente:'Profumeria Bella',    vettore:'FedEx',          rating:5,
+    anteprima:'Servizio impeccabile',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'Servizio impeccabile' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Nessun problema' }, { q:'Il corriere è stato cordiale e professionale?', a:'Molto professionale' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'Assolutamente' } ]
+  },
+  { id:10, dateStr:'10 Mar 2026', time:'12:05', cliente:'Rossi Abbigliamento', vettore:'BRT',            rating:1,
+    anteprima:'Pacco danneggiato, grave disservizio',
+    qa:[ { q:'La consegna ha rispettato le tempistiche che ti aspettavi?', a:'No, tre giorni di ritardo' }, { q:'In che condizioni hai trovato il pacco al momento della consegna?', a:'Pacco danneggiato' }, { q:'Il corriere è stato cordiale e professionale?', a:'Scortese' }, { q:'Sei stato/a informato/a in modo adeguato sullo stato della spedizione?', a:'No, mai' } ]
+  }
+];
+
+/* ── Stars ── */
+function starColor(rating) {
+  if (rating >= 4) return '#F5A623';
+  if (rating === 3) return '#F0C040';
+  if (rating === 2) return '#E07A2F';
+  return '#E24B4A';
+}
+function starsHtml(rating, size) {
+  const color = starColor(rating);
+  const fs = size === 'lg' ? '20px' : '13px';
+  return Array.from({length:5}, (_,i) =>
+    `<span style="color:${i < rating ? color : '#d4d2ce'};font-size:${fs}">★</span>`
+  ).join('');
+}
+
+/* ── State ── */
+let currentPage = 1;
+let perPage = 10;
+let filteredData = [...feedbackData];
+let sortDir = 'desc'; // 'asc' | 'desc'
+
+/* ── Sort direction toggle ── */
+function toggleSortDir() {
+  sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+  const btn = document.getElementById('sort-dir-btn');
+  btn.classList.toggle('asc', sortDir === 'asc');
+  btn.title = sortDir === 'asc' ? 'Ordine crescente (clicca per invertire)' : 'Ordine decrescente (clicca per invertire)';
+  updateSortArrows();
+  applyFilters();
+}
+
+function setSort(field) {
+  const sel = document.getElementById('sort-by');
+  if (sel.value === field) {
+    toggleSortDir();
+    return;
+  }
+  sel.value = field;
+  applyFilters();
+}
+
+function updateSortArrows() {
+  const sortBy = document.getElementById('sort-by').value;
+  const arrow = sortDir === 'desc' ? '↓' : '↑';
+  ['date','rating'].forEach(f => {
+    const th = document.getElementById('th-' + f);
+    const ar = document.getElementById('arrow-' + f);
+    if (!th) return;
+    if (sortBy === f) { th.classList.add('active'); ar.textContent = arrow; }
+    else             { th.classList.remove('active'); ar.textContent = '↓'; }
+  });
+}
+
+/* ── Render ── */
+function renderRows(data) {
+  filteredData = data;
+  currentPage = 1;
+  renderPage();
+  renderPagination();
+  updateCount();
+}
+
+function renderPage() {
+  const start = (currentPage - 1) * perPage;
+  const slice = filteredData.slice(start, start + perPage);
+  const list = document.getElementById('feedback-list');
+  if (slice.length === 0) {
+    list.innerHTML = '<div class="empty-state">Nessun feedback corrisponde ai criteri di ricerca.</div>';
+    return;
+  }
+  list.innerHTML = slice.map(f => {
+    const cl = clientiMap[f.cliente] || { initials:'??', color:'#5f5e5a', bg:'#eeece9' };
+    return `
+    <div class="feedback-row" onclick="openDetail(${f.id})">
+      <div class="col-icon">
+        <div class="client-avatar" title="${f.cliente}" style="background:${cl.bg};color:${cl.color}">${cl.initials}</div>
+      </div>
+      <div class="col-data">
+        <span class="row-date">${f.dateStr}</span>
+        <span class="row-time">${f.time}</span>
+      </div>
+      <div class="col-vettore">
+        <div class="carrier-chip">
+          ${carrierIconHtml(f.vettore)}
+          <span class="col-vettore-name">${f.vettore}</span>
+        </div>
+      </div>
+      <div class="col-valutazione">
+        <span class="stars-inline">${starsHtml(f.rating, 'sm')}</span>
+        <span class="rating-number">${f.rating}.0</span>
+      </div>
+      <div class="col-anteprima">${f.anteprima}</div>
+      <div class="col-azioni" onclick="event.stopPropagation()">
+        <a class="action-icon-btn" href="#" title="Ordine" onclick="return false">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M4 2h8a1 1 0 0 1 1 1v11l-1.5-1L10 14l-1.5-1L8 14l-1.5-1L5 14l-1.5-1L2 14V3a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5 6h6M5 8.5h6M5 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </a>
+        <a class="action-icon-btn" href="#" title="Spedizione" onclick="return false">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M12 7l2.5 1.5V13H12" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><circle cx="4" cy="13.5" r="1.2" stroke="currentColor" stroke-width="1.2"/><circle cx="10" cy="13.5" r="1.2" stroke="currentColor" stroke-width="1.2"/></svg>
+        </a>
+      </div>
+      <div class="col-chevron">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPagination() {
+  const total = filteredData.length;
+  const totalPages = Math.ceil(total / perPage) || 1;
+  const start = (currentPage - 1) * perPage + 1;
+  const end = Math.min(currentPage * perPage, total);
+  document.getElementById('pagination-info').textContent = total === 0 ? '0 risultati' : `${start}–${end} di ${total}`;
+  let btns = `<button class="pager-btn" onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for (let p = 1; p <= totalPages; p++) btns += `<button class="pager-btn ${p===currentPage?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  btns += `<button class="pager-btn" onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  document.getElementById('pagination-buttons').innerHTML = btns;
+}
+
+function goPage(p) {
+  const totalPages = Math.ceil(filteredData.length / perPage) || 1;
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderPage();
+  renderPagination();
+}
+
+function updateCount() {
+  const total = filteredData.length;
+  const totalPages = Math.ceil(total / perPage) || 1;
+  document.getElementById('controls-count').textContent = `${total} Elementi | ${totalPages} ${totalPages===1?'Pagina':'Pagine'}`;
+}
+
+/* ── Filters ── */
+function getFilteredData() {
+  const cliente  = document.getElementById('filter-cliente').value;
+  const vettore  = document.getElementById('filter-vettore').value;
+  const rating   = document.getElementById('filter-valutazione').value;
+  const search   = document.getElementById('search-input').value.toLowerCase().trim();
+  const sortBy   = document.getElementById('sort-by').value;
+
+  let data = feedbackData.filter(f => {
+    const matchCliente = !cliente || f.cliente === cliente;
+    const matchVettore = !vettore || f.vettore === vettore;
+    const matchRating  = !rating  || f.rating === parseInt(rating);
+    const matchSearch  = !search  ||
+      f.cliente.toLowerCase().includes(search) ||
+      f.vettore.toLowerCase().includes(search) ||
+      f.anteprima.toLowerCase().includes(search) ||
+      f.dateStr.toLowerCase().includes(search);
+    return matchCliente && matchVettore && matchRating && matchSearch;
+  });
+
+  const dir = sortDir === 'desc' ? -1 : 1;
+  data = [...data].sort((a, b) => {
+    if (sortBy === 'rating') return dir * (a.rating - b.rating);
+    return dir * (b.id - a.id); // date: id as proxy, invert for natural desc
+  });
+
+  return data;
+}
+
+function applyFilters() {
+  updateSortArrows();
+  renderRows(getFilteredData());
+}
+
+function clearFilters() {
+  ['filter-cliente','filter-vettore','filter-valutazione'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  document.getElementById('search-input').value = '';
+  document.getElementById('sort-by').value = 'date';
+  sortDir = 'desc';
+  document.getElementById('sort-dir-btn').classList.remove('asc');
+  updateSortArrows();
+  renderRows(feedbackData);
+}
+
+function onPerPageChange() {
+  perPage = parseInt(document.getElementById('per-page').value);
+  currentPage = 1;
+  renderPage();
+  renderPagination();
+  updateCount();
+}
+
+/* ── Modal ── */
+function openDetail(id) {
+  const f = feedbackData.find(x => x.id === id);
+  if (!f) return;
+  const c = carriers[f.vettore] || { abbr: f.vettore.slice(0,2).toUpperCase(), color:'#fff', bg:'#888780' };
+  document.getElementById('modal-carrier-icon').style.cssText = `width:28px;height:28px;border-radius:6px;font-size:9px;background:${c.bg};color:${c.color}`;
+  document.getElementById('modal-carrier-icon').textContent = c.abbr;
+  document.getElementById('modal-carrier-name').textContent = f.vettore;
+  document.getElementById('modal-carrier-badge').style.cssText = `background:${c.bg}18;color:${c.color}`;
+  document.getElementById('modal-stars-lg').innerHTML = starsHtml(f.rating, 'lg');
+  document.getElementById('modal-rating-lg').textContent = f.rating + '.0';
+  document.getElementById('modal-qa-list').innerHTML = f.qa.map(q =>
+    `<div class="qa-item"><p class="qa-question">${q.q}</p><p class="qa-answer">${q.a}</p></div>`
+  ).join('');
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) { if (e.target.id === 'detail-overlay') closeDetail(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+/* ── Reload ── */
+function simulateReload() {
+  const btn = document.getElementById('reload-btn');
+  btn.classList.add('spinning');
+  setTimeout(() => btn.classList.remove('spinning'), 700);
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', () => {
+  updateSortArrows();
+  renderRows(feedbackData);
+});
+</script>
+</body>
+</html>
