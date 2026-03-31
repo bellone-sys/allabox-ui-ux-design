@@ -98,7 +98,8 @@
   .ac-item .ac-sub { font-size: 11px; color: #888780; }
   .ac-empty { padding: 10px 12px; font-size: 13px; color: #888780; font-style: italic; }
   .addr-inline-wrap { position: relative; }
-  .addr-inline-wrap input { padding-right: 44px; }
+  .addr-inline-wrap input { padding-right: 44px; padding-left: 32px; }
+  .addr-pin { position: absolute; left: 10px; top: 19px; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-tertiary); pointer-events: none; z-index: 1; }
   .addr-action-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.22); background: #f5f5f4; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #5f5e5a; transition: background .15s; }
   .addr-action-btn:hover { background: #eeece9; }
   .rubrica-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 38px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; background: #ffffff; font-size: 13px; color: #5f5e5a; cursor: pointer; white-space: nowrap; transition: background .15s; }
@@ -209,13 +210,14 @@
           <span class="info-btn">i<span class="tooltip-pop">Nome visibile dal corriere lato strada</span></span>
         </label>
         <div class="input-icon-wrap">
-          <svg class="field-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="6" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 6V4a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M2 6.5h12M2 6.5L3.5 3h9L14 6.5M2 6.5v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-6" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M6 13.5V10h4v3.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           <input type="text" id="ship-azienda" placeholder="es. Bar Centrale" oninput="onShipChange()">
         </div>
       </div>
       <div class="field ac-wrap">
         <label>Indirizzo <span class="req">*</span></label>
         <div class="addr-inline-wrap">
+          <svg class="addr-pin" viewBox="0 0 16 16" fill="none"><path d="M8 14.5S3 9.8 3 6a5 5 0 0 1 10 0c0 3.8-5 8.5-5 8.5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg>
           <input type="text" id="ship-addr-input" placeholder="es. Via Roma, Longarone" autocomplete="off"
             oninput="addrSearch(this.value)" onblur="addrBlur()" onkeydown="addrKey(event)">
           <button class="addr-action-btn" id="ship-addr-btn" onclick="openAddrModal('ship')" title="Inserisci indirizzo manualmente">
@@ -296,6 +298,7 @@
       <div class="field ac-wrap">
         <label>Indirizzo <span class="req">*</span></label>
         <div class="addr-inline-wrap">
+          <svg class="addr-pin" viewBox="0 0 16 16" fill="none"><path d="M8 14.5S3 9.8 3 6a5 5 0 0 1 10 0c0 3.8-5 8.5-5 8.5z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.8" stroke="currentColor" stroke-width="1.2"/></svg>
           <input type="text" id="bill-addr" placeholder="es. Via Roma, Milano" autocomplete="off"
             oninput="billAddrSearch(this.value)" onblur="billAddrBlur()" onkeydown="billAddrKey(event)">
           <div class="ac-dropdown" id="ac-bill-addr"></div>
