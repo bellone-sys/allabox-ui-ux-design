@@ -59,6 +59,10 @@
     .snc-row label { color: #b4b2a9; }
     .rub-btn.state-add { color: #85B7EB; }
     .rub-btn.state-add:hover:not(:disabled) { background: #042C53; border-color: #0C447C; }
+    .rubrica-pager { border-top-color: rgba(255,255,255,0.10); color: #888780; }
+    .rubrica-pager button { border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .rubrica-pager button:hover:not(:disabled) { background: #2a2a28; }
+    .input-icon-wrap .field-icon { color: #888780; }
   }
   body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background: #eeece9; color: #1a1a19; padding: 2rem 1rem; min-height: 100vh; }
   .page-wrapper { max-width: 720px; margin: 0 auto; }
@@ -150,6 +154,15 @@
   .btn-primary { height: 36px; padding: 0 18px; border-radius: 8px; border: none; background: #185FA5; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
   .btn-primary:hover { background: #0C447C; }
   .btn-primary:disabled { background: #B5D4F4; cursor: default; }
+  /* Input icon wrap */
+  .input-icon-wrap { position: relative; }
+  .input-icon-wrap .field-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--color-text-tertiary); pointer-events: none; flex-shrink: 0; }
+  .input-icon-wrap input { padding-left: 32px; }
+  /* Rubrica pager */
+  .rubrica-pager { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px; border-top: 0.5px solid rgba(0,0,0,0.12); font-size: 12px; color: #888780; flex-shrink: 0; }
+  .rubrica-pager button { background: none; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 6px; padding: 4px 11px; font-size: 12px; color: #5f5e5a; cursor: pointer; transition: background .15s; }
+  .rubrica-pager button:hover:not(:disabled) { background: #f5f5f4; }
+  .rubrica-pager button:disabled { opacity: 0.35; cursor: default; }
   @media (max-width: 540px) { .col2, .addr-civic { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -178,18 +191,27 @@
           <label>Nome e Cognome <span class="req">*</span>
             <span class="info-btn">i<span class="tooltip-pop">Nome che il corriere trova sul citofono</span></span>
           </label>
-          <input type="text" id="ship-name" placeholder="es. Mario Rossi" oninput="onShipChange()">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 14c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="ship-name" placeholder="es. Mario Rossi" oninput="onShipChange()">
+          </div>
         </div>
         <div class="field">
           <label>Riferimento cliente <span class="opt">(opzionale)</span></label>
-          <input type="text" id="ship-ref" placeholder="es. CLI-0042" oninput="onShipChange()">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="ship-ref" placeholder="es. CLI-0042" oninput="onShipChange()">
+          </div>
         </div>
       </div>
       <div class="field" id="ship-azienda-wrap">
         <label>Nome attività <span class="req">*</span>
           <span class="info-btn">i<span class="tooltip-pop">Nome visibile dal corriere lato strada</span></span>
         </label>
-        <input type="text" id="ship-azienda" placeholder="es. Bar Centrale" oninput="onShipChange()">
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="6" width="12" height="8" rx="1" stroke="currentColor" stroke-width="1.3"/><path d="M5 6V4a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <input type="text" id="ship-azienda" placeholder="es. Bar Centrale" oninput="onShipChange()">
+        </div>
       </div>
       <div class="field ac-wrap">
         <label>Indirizzo <span class="req">*</span></label>
@@ -208,11 +230,19 @@
       <div class="col2">
         <div class="field">
           <label>Email <span class="opt">(opzionale)</span></label>
-          <input type="email" id="ship-email" placeholder="es. mario.rossi@email.it" oninput="onShipChange()">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 5.5l6 4 6-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <input type="email" id="ship-email" placeholder="es. mario.rossi@email.it" oninput="onShipChange(); clearErr(this)" onblur="validateField(this,'email')">
+          </div>
+          <span class="err-msg">Inserisci un indirizzo email valido</span>
         </div>
         <div class="field">
           <label>Telefono <span class="opt">(opzionale)</span></label>
-          <input type="tel" id="ship-phone" placeholder="es. 3391234567" oninput="onShipChange()">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M5.5 2h-2A1 1 0 0 0 2.5 3c0 6.075 4.925 11 11 11a1 1 0 0 0 1-1v-2a1 1 0 0 0-.684-.948l-2-.667a1 1 0 0 0-1.052.26l-.857.857A8.03 8.03 0 0 1 6.498 6.093l.857-.857a1 1 0 0 0 .26-1.052L6.948 2.684A1 1 0 0 0 5.5 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <input type="tel" id="ship-phone" placeholder="es. 3391234567" oninput="restrictPhone(this); onShipChange(); clearErr(this)" onblur="validateField(this,'phone')">
+          </div>
+          <span class="err-msg">Inserisci solo numeri (8–13 cifre)</span>
         </div>
       </div>
       <div class="rubrica-action-wrap">
@@ -243,16 +273,25 @@
           <label>Nome e Cognome <span class="req">*</span>
             <span class="info-btn">i<span class="tooltip-pop">Nome che il corriere trova sul citofono</span></span>
           </label>
-          <input type="text" id="bill-name" placeholder="es. Mario Rossi">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 14c0-2.761 2.239-5 5-5s5 2.239 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="bill-name" placeholder="es. Mario Rossi">
+          </div>
         </div>
         <div class="field">
           <label>Riferimento cliente <span class="opt">(opzionale)</span></label>
-          <input type="text" id="bill-ref" placeholder="es. CLI-0042">
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M3 8h7M3 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="bill-ref" placeholder="es. CLI-0042">
+          </div>
         </div>
       </div>
       <div class="field">
         <label>Ragione sociale <span class="req">*</span></label>
-        <input type="text" id="bill-azienda" placeholder="es. Bar Centrale di Rossi Mario">
+        <div class="input-icon-wrap">
+          <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M2 14V6l6-4 6 4v8" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><rect x="6" y="9" width="4" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
+          <input type="text" id="bill-azienda" placeholder="es. Bar Centrale di Rossi Mario">
+        </div>
       </div>
       <div class="field ac-wrap">
         <label>Indirizzo <span class="req">*</span></label>
@@ -268,24 +307,42 @@
           </button>
         </div>
       </div>
-      <div class="col2">
-        <div class="field">
-          <label>Email <span class="opt">(opzionale)</span></label>
-          <input type="email" id="bill-email" placeholder="es. fatture@azienda.it">
-        </div>
-        <div class="field">
-          <label>Telefono <span class="opt">(opzionale)</span></label>
-          <input type="tel" id="bill-phone" placeholder="es. 3391234567">
-        </div>
-      </div>
       <div class="sdiv"><hr><span>Dati fiscali — opzionali</span><hr></div>
       <div class="col2">
-        <div class="field"><label>Partita IVA</label><input type="text" id="bill-piva" placeholder="es. 12345678901"></div>
-        <div class="field"><label>Codice fiscale</label><input type="text" id="bill-cf" placeholder="es. RSSMRA80A01H501Z"></div>
+        <div class="field">
+          <label>Partita IVA</label>
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M2 14V6l6-4 6 4v8" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><rect x="6" y="9" width="4" height="5" rx="0.5" stroke="currentColor" stroke-width="1.3"/></svg>
+            <input type="text" id="bill-piva" placeholder="es. 12345678901" oninput="restrictPiva(this); clearErr(this)" onblur="validateField(this,'piva')">
+          </div>
+          <span class="err-msg">La Partita IVA deve avere 11 cifre</span>
+        </div>
+        <div class="field">
+          <label>Codice fiscale</label>
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="bill-cf" placeholder="es. RSSMRA80A01H501Z" oninput="restrictCF(this); clearErr(this)" onblur="validateField(this,'cf')">
+          </div>
+          <span class="err-msg">Il Codice Fiscale deve avere 16 caratteri nel formato corretto</span>
+        </div>
       </div>
       <div class="col2">
-        <div class="field"><label>Codice SDI</label><input type="text" id="bill-sdi" placeholder="es. M5UXCR1"></div>
-        <div class="field"><label>PEC</label><input type="email" id="bill-pec" placeholder="pec@azienda.it"></div>
+        <div class="field">
+          <label>Codice SDI</label>
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M5 5h4.5a2 2 0 0 1 0 4H5.5a2 2 0 0 0 0 4H11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="text" id="bill-sdi" placeholder="es. M5UXCR1" oninput="restrictSDI(this); clearErr(this)" onblur="validateField(this,'sdi')">
+          </div>
+          <span class="err-msg">Il Codice SDI deve avere 7 caratteri alfanumerici</span>
+        </div>
+        <div class="field">
+          <label>PEC</label>
+          <div class="input-icon-wrap">
+            <svg class="field-icon" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M2 5.5l6 4 6-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            <input type="email" id="bill-pec" placeholder="pec@azienda.it" oninput="clearErr(this)" onblur="validateField(this,'email')">
+          </div>
+          <span class="err-msg">La PEC deve essere un indirizzo email valido</span>
+        </div>
       </div>
     </div>
   </div>
@@ -370,6 +427,11 @@
         <input type="text" id="rubrica-search-input" placeholder="Cerca per nome, cognome o attività..." oninput="filterRubrica(this.value)" autocomplete="off">
       </div>
       <div class="rubrica-list" id="rubrica-list"></div>
+      <div class="rubrica-pager" id="rubrica-pager" style="display:none">
+        <button id="rub-prev" onclick="rubricaChangePage(-1)">← Prec.</button>
+        <span id="rub-page-info">Pagina 1 di 1</span>
+        <button id="rub-next" onclick="rubricaChangePage(1)">Succ. →</button>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-ghost" onclick="closeRubricaModal()">Annulla</button>
@@ -382,6 +444,27 @@
 var GEO=[{city:'Torino',prov:'Torino',region:'Piemonte',country:'Italia'},{city:'Milano',prov:'Milano',region:'Lombardia',country:'Italia'},{city:'Roma',prov:'Roma',region:'Lazio',country:'Italia'},{city:'Napoli',prov:'Napoli',region:'Campania',country:'Italia'},{city:'Bologna',prov:'Bologna',region:'Emilia-Romagna',country:'Italia'},{city:'Firenze',prov:'Firenze',region:'Toscana',country:'Italia'},{city:'Venezia',prov:'Venezia',region:'Veneto',country:'Italia'},{city:'Longarone',prov:'Belluno',region:'Veneto',country:'Italia'},{city:'Belluno',prov:'Belluno',region:'Veneto',country:'Italia'},{city:'Verona',prov:'Verona',region:'Veneto',country:'Italia'},{city:'Padova',prov:'Padova',region:'Veneto',country:'Italia'},{city:'Genova',prov:'Genova',region:'Liguria',country:'Italia'},{city:'Palermo',prov:'Palermo',region:'Sicilia',country:'Italia'},{city:'Bari',prov:'Bari',region:'Puglia',country:'Italia'},{city:'Alessandria',prov:'Alessandria',region:'Piemonte',country:'Italia'},{city:'Brescia',prov:'Brescia',region:'Lombardia',country:'Italia'},{city:'Bergamo',prov:'Bergamo',region:'Lombardia',country:'Italia'},{city:'Trento',prov:'Trento',region:'Trentino-Alto Adige',country:'Italia'},{city:'Bolzano',prov:'Bolzano',region:'Trentino-Alto Adige',country:'Italia'},{city:'Trieste',prov:'Trieste',region:'Friuli-Venezia Giulia',country:'Italia'},{city:'Parigi',prov:'Île-de-France',region:'Île-de-France',country:'Francia'},{city:'Berlino',prov:'Berlino',region:'Berlino',country:'Germania'},{city:'Madrid',prov:'Madrid',region:'Comunidad de Madrid',country:'Spagna'},{city:'Amsterdam',prov:'Noord-Holland',region:'Noord-Holland',country:'Paesi Bassi'},{city:'Vienna',prov:'Vienna',region:'Vienna',country:'Austria'},{city:'Zurigo',prov:'Zurigo',region:'Zurigo',country:'Svizzera'},{city:'Londra',prov:'Greater London',region:'Inghilterra',country:'Regno Unito'},{city:'New York',prov:'New York',region:'New York',country:'Stati Uniti'},{city:'Tokyo',prov:'Tokyo',region:'Kantō',country:'Giappone'},{city:'Dubai',prov:'Dubai',region:'Dubai',country:'Emirati Arabi Uniti'}];
 var RUBRICA=[{name:'Mario Rossi',azienda:'Allabox srl',addr:'Via Roma 1, 32013 Longarone, Belluno, Italia',email:'mario.rossi@allabox.it',phone:'3391234567'},{name:'Laura Bianchi',azienda:'Tech Solutions srl',addr:'Via Garibaldi 42, 10100 Torino, Torino, Italia',email:'l.bianchi@tech.it',phone:'3481234567'},{name:'Giuseppe Verdi',azienda:'Logistica Nord srl',addr:'Via Manzoni 8, 20121 Milano, Milano, Italia',email:'g.verdi@lognord.it',phone:'3351234567'},{name:'Anna Ferrari',azienda:'',addr:'Corso Venezia 15, 20121 Milano, Milano, Italia',email:'anna.ferrari@email.it',phone:'3471234567'},{name:'Roberto Esposito',azienda:'Studio Esposito',addr:'Via Toledo 200, 80134 Napoli, Napoli, Italia',email:'r.esposito@studio.it',phone:'3461234567'},{name:'Chiara Conti',azienda:'Conti & Partners',addr:'Via del Corso 10, 00186 Roma, Roma, Italia',email:'c.conti@partners.it',phone:'3421234567'},{name:'Luca Martini',azienda:'',addr:'Piazza della Repubblica 5, 50123 Firenze, Firenze, Italia',email:'luca.martini@gmail.com',phone:'3411234567'}];
 var billAddrResults=[],billAddrFocusIdx=-1;var rubricaState=null,hasChangesAfterSave=false,validated={city:false,prov:false,region:false,country:false},acFocusIdx={city:-1,prov:-1,region:-1,country:-1,addr:-1},addrResults=[],modalAddrTarget='ship',rubricaSelectedIdx=null;
+var rubricaPage=0,rubricaFilteredList=RUBRICA.slice(),RUBRICA_PAGE_SIZE=5;
+
+/* ── Validation helpers ── */
+function clearErr(el){el.classList.remove('error');}
+function validateField(el,type){
+  var v=el.value.trim();
+  if(!v)return; // opzionale: non validare se vuoto
+  var ok=true;
+  if(type==='email'){ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);}
+  else if(type==='phone'){ok=/^[+\d]{8,13}$/.test(v);}
+  else if(type==='cf'){ok=/^[A-Z]{6}\d{2}[A-EHLMPRST]\d{2}[A-Z]\d{3}[A-Z]$/i.test(v);}
+  else if(type==='sdi'){ok=/^[A-Z0-9]{7}$/i.test(v);}
+  else if(type==='piva'){ok=/^\d{11}$/.test(v);}
+  if(!ok){el.classList.add('error');}else{el.classList.remove('error');}
+}
+
+/* ── Input restriction helpers ── */
+function restrictPhone(el){var s=el.selectionStart;el.value=el.value.replace(/[^\d+]/g,'');el.setSelectionRange(s,s);}
+function restrictCF(el){var s=el.selectionStart,v=el.value.replace(/[^A-Za-z0-9]/g,'').slice(0,16).toUpperCase();el.value=v;el.setSelectionRange(Math.min(s,v.length),Math.min(s,v.length));}
+function restrictSDI(el){var s=el.selectionStart,v=el.value.replace(/[^A-Za-z0-9]/g,'').slice(0,7).toUpperCase();el.value=v;el.setSelectionRange(Math.min(s,v.length),Math.min(s,v.length));}
+function restrictPiva(el){var s=el.selectionStart,v=el.value.replace(/\D/g,'').slice(0,11);el.value=v;el.setSelectionRange(Math.min(s,v.length),Math.min(s,v.length));}
 function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
 function getVal(r,t){return t==='city'?r.city:t==='prov'?r.prov:t==='region'?r.region:r.country;}
 function getSub(r,t){return t==='city'?r.prov+', '+r.country:t==='prov'?r.region+', '+r.country:t==='region'?r.country:'';}
@@ -439,16 +522,26 @@ function acSelect(type,idx){var dd=document.getElementById('ac-'+type),r=dd._res
 function acClose(type){var dd=document.getElementById('ac-'+type);if(dd)dd.classList.remove('open');acFocusIdx[type]=-1;}
 function acBlur(type){setTimeout(function(){acClose(type);var inp=document.getElementById('m-'+type);if(inp&&inp.value&&!validated[type]){inp.classList.add('error');inp.classList.remove('valid');}},180);}
 function acKey(e,type){var dd=document.getElementById('ac-'+type);if(!dd)return;var items=dd.querySelectorAll('.ac-item');if(!dd.classList.contains('open')||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();acFocusIdx[type]=Math.min(acFocusIdx[type]+1,items.length-1);}else if(e.key==='ArrowUp'){e.preventDefault();acFocusIdx[type]=Math.max(acFocusIdx[type]-1,0);}else if(e.key==='Enter'&&acFocusIdx[type]>=0){e.preventDefault();acSelect(type,acFocusIdx[type]);return;}else if(e.key==='Escape'){acClose(type);return;}items.forEach(function(el,i){el.classList.toggle('focused',i===acFocusIdx[type]);});}
-function openRubricaModal(){rubricaSelectedIdx=null;document.getElementById('rubrica-search-input').value='';document.getElementById('rubrica-confirm-btn').disabled=true;renderRubricaList(RUBRICA);document.getElementById('rubrica-modal-overlay').classList.add('open');setTimeout(function(){document.getElementById('rubrica-search-input').focus();},100);}
+function openRubricaModal(){rubricaSelectedIdx=null;rubricaPage=0;document.getElementById('rubrica-search-input').value='';document.getElementById('rubrica-confirm-btn').disabled=true;rubricaFilteredList=RUBRICA.slice();renderRubricaList();document.getElementById('rubrica-modal-overlay').classList.add('open');setTimeout(function(){document.getElementById('rubrica-search-input').focus();},100);}
 function closeRubricaModal(){document.getElementById('rubrica-modal-overlay').classList.remove('open');}
 function handleRubricaOverlay(e){if(e.target===document.getElementById('rubrica-modal-overlay'))closeRubricaModal();}
-function filterRubrica(q){if(!q){renderRubricaList(RUBRICA);return;}var nq=norm(q);renderRubricaList(RUBRICA.filter(function(r){return norm(r.name).indexOf(nq)>=0||norm(r.azienda||'').indexOf(nq)>=0;}));}
-function renderRubricaList(list){var el=document.getElementById('rubrica-list');if(!list.length){el.innerHTML='<div class="rubrica-list-empty">Nessun indirizzo trovato</div>';return;}el.innerHTML=list.map(function(r){var idx=RUBRICA.indexOf(r),initials=r.name.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();return'<div class="rubrica-item" id="ri-'+idx+'" onclick="selectRubricaItem('+idx+')"><div class="rubrica-avatar">'+initials+'</div><div style="flex:1;min-width:0"><div class="rubrica-item-name">'+r.name+(r.azienda?' — <span style="font-weight:400">'+r.azienda+'</span>':'')+'</div><div class="rubrica-item-sub">'+r.addr+'</div></div></div>';}).join('');}
+function filterRubrica(q){rubricaPage=0;if(!q){rubricaFilteredList=RUBRICA.slice();}else{var nq=norm(q);rubricaFilteredList=RUBRICA.filter(function(r){return norm(r.name).indexOf(nq)>=0||norm(r.azienda||'').indexOf(nq)>=0;});}renderRubricaList();}
+function rubricaChangePage(dir){rubricaPage+=dir;renderRubricaList();}
+function renderRubricaList(){
+  var list=rubricaFilteredList,el=document.getElementById('rubrica-list'),pager=document.getElementById('rubrica-pager');
+  if(!list.length){el.innerHTML='<div class="rubrica-list-empty">Nessun indirizzo trovato</div>';pager.style.display='none';return;}
+  var totalPages=Math.ceil(list.length/RUBRICA_PAGE_SIZE);
+  rubricaPage=Math.max(0,Math.min(rubricaPage,totalPages-1));
+  var start=rubricaPage*RUBRICA_PAGE_SIZE,page=list.slice(start,start+RUBRICA_PAGE_SIZE);
+  el.innerHTML=page.map(function(r){var idx=RUBRICA.indexOf(r),initials=r.name.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();return'<div class="rubrica-item" id="ri-'+idx+'" onclick="selectRubricaItem('+idx+')"><div class="rubrica-avatar">'+initials+'</div><div style="flex:1;min-width:0"><div class="rubrica-item-name">'+r.name+(r.azienda?' — <span style="font-weight:400">'+r.azienda+'</span>':'')+'</div><div class="rubrica-item-sub">'+r.addr+'</div></div></div>';}).join('');
+  if(rubricaSelectedIdx!==null){var sel=document.getElementById('ri-'+rubricaSelectedIdx);if(sel)sel.classList.add('selected');}
+  if(totalPages>1){pager.style.display='flex';document.getElementById('rub-page-info').textContent='Pagina '+(rubricaPage+1)+' di '+totalPages;document.getElementById('rub-prev').disabled=rubricaPage===0;document.getElementById('rub-next').disabled=rubricaPage===totalPages-1;}else{pager.style.display='none';}
+}
 function selectRubricaItem(idx){rubricaSelectedIdx=idx;document.querySelectorAll('.rubrica-item').forEach(function(el){el.classList.remove('selected');});var el=document.getElementById('ri-'+idx);if(el)el.classList.add('selected');document.getElementById('rubrica-confirm-btn').disabled=false;}
 function confirmRubrica(){if(rubricaSelectedIdx===null)return;var r=RUBRICA[rubricaSelectedIdx];document.getElementById('ship-name').value=r.name;document.getElementById('ship-azienda').value=r.azienda||'';document.getElementById('ship-addr-input').value=r.addr;document.getElementById('ship-email').value=r.email||'';document.getElementById('ship-phone').value=r.phone||'';rubricaState='from_rubrica';hasChangesAfterSave=false;updateShipAddrBtn();renderRubBtn();closeRubricaModal();}
 function togglePrivate(){var cb=document.getElementById('ship-private');document.getElementById('ship-azienda-wrap').style.display=cb.checked?'none':'flex';onShipChange();}
 function toggleBilling(cb){var sec=document.getElementById('billing-section');if(cb.checked){sec.classList.add('visible');copyShipToBill();setTimeout(function(){sec.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}else{sec.classList.remove('visible');}}
-function copyShipToBill(){['name','ref','email','phone'].forEach(function(f){document.getElementById('bill-'+f).value=document.getElementById('ship-'+f).value||'';});document.getElementById('bill-addr').value=document.getElementById('ship-addr-input').value||'';document.getElementById('bill-azienda').value=document.getElementById('ship-azienda').value||'';updateBillAddrBtn();}
+function copyShipToBill(){['name','ref'].forEach(function(f){document.getElementById('bill-'+f).value=document.getElementById('ship-'+f).value||'';});document.getElementById('bill-addr').value=document.getElementById('ship-addr-input').value||'';document.getElementById('bill-azienda').value=document.getElementById('ship-azienda').value||'';updateBillAddrBtn();}
 renderRubBtn();
 </script>
 </body>
