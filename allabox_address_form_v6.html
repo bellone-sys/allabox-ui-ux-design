@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Allabox — Indirizzo di spedizione v6</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f5f4;
+    --color-background-tertiary: #eeece9;
+    --color-text-primary: #1a1a19;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --color-border-primary: rgba(0,0,0,0.32);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    body { background: #333330; color: #f0ede8; }
+    .step-card { background: #1e1e1c; border-color: rgba(255,255,255,0.10); }
+    .step-header { border-bottom-color: rgba(255,255,255,0.10); }
+    .step-title, .toggle-label, .modal-title { color: #f0ede8; }
+    .step-badge { background: #0C447C; color: #E6F1FB; }
+    .field label { color: #b4b2a9; }
+    .field input { background: #1e1e1c; color: #f0ede8; border-color: rgba(255,255,255,0.22); }
+    .field input::placeholder { color: #888780; }
+    .field input:focus { border-color: #378ADD; }
+    .hint, .priv-sub, .toggle-sub { color: #888780; }
+    .priv-top-toggle, .toggle-row { background: #2a2a28; border-color: rgba(255,255,255,0.10); }
+    .priv-top-toggle:hover, .toggle-row:hover { border-color: rgba(255,255,255,0.22); }
+    .rubrica-btn { background: #1e1e1c; border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .rubrica-btn:hover { background: #2a2a28; }
+    .addr-action-btn { background: #2a2a28; border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .addr-action-btn:hover { background: #333330; }
+    .ac-dropdown { background: #1e1e1c; border-color: rgba(255,255,255,0.22); }
+    .ac-item { color: #f0ede8; }
+    .ac-item:hover, .ac-item.focused { background: #2a2a28; }
+    .ac-item .ac-sub, .ac-empty { color: #888780; }
+    .modal { background: #1e1e1c; border-color: rgba(255,255,255,0.10); }
+    .modal-header { border-bottom-color: rgba(255,255,255,0.10); }
+    .modal-footer { border-top-color: rgba(255,255,255,0.10); }
+    .sdiv hr { border-top-color: rgba(255,255,255,0.10); }
+    .sdiv span { color: #888780; }
+    .rubrica-item:hover { background: #2a2a28; }
+    .rubrica-item.selected { background: #0C447C; border-color: #378ADD; }
+    .rubrica-item-name { color: #f0ede8; }
+    .rubrica-item-sub { color: #888780; }
+    .rubrica-search-wrap input { background: #1e1e1c; color: #f0ede8; border-color: rgba(255,255,255,0.22); }
+    .btn-ghost { color: #b4b2a9; border-color: rgba(255,255,255,0.22); }
+    .btn-ghost:hover { background: #2a2a28; }
+    .info-btn { background: #2a2a28; border-color: rgba(255,255,255,0.22); color: #b4b2a9; }
+    .tooltip-pop { background: #f0ede8; color: #1a1a19; }
+    .tooltip-pop::after { border-top-color: #f0ede8; }
+    .snc-row label { color: #b4b2a9; }
+    .rub-btn.state-add { color: #85B7EB; }
+    .rub-btn.state-add:hover:not(:disabled) { background: #042C53; border-color: #0C447C; }
+  }
+  body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background: #eeece9; color: #1a1a19; padding: 2rem 1rem; min-height: 100vh; }
+  .page-wrapper { max-width: 720px; margin: 0 auto; }
+  .page-title { font-size: 18px; font-weight: 500; color: #1a1a19; margin-bottom: 1.5rem; }
+  .step-card { background: #ffffff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 12px; overflow: visible; margin-bottom: 12px; }
+  .step-header { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .step-badge { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; background: #E6F1FB; color: #0C447C; }
+  .step-title { font-size: 14px; font-weight: 500; color: #1a1a19; flex: 1; }
+  .step-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+  .col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .addr-civic { display: grid; grid-template-columns: 1fr 130px; gap: 14px; }
+  .field { display: flex; flex-direction: column; gap: 5px; position: relative; }
+  .field label { font-size: 11px; font-weight: 500; color: #5f5e5a; letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
+  .req { color: #E24B4A; margin-left: 2px; }
+  .opt { color: #888780; font-weight: 400; font-size: 10px; text-transform: none; letter-spacing: 0; margin-left: 4px; }
+  .field input { height: 38px; padding: 0 12px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; font-size: 14px; color: #1a1a19; background: #ffffff; width: 100%; outline: none; transition: border-color .15s, box-shadow .15s; }
+  .field input:focus { border: 1.5px solid #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,.12); }
+  .field input::placeholder { color: #888780; }
+  .field input.valid { border-color: #1D9E75; }
+  .field input.error { border-color: #E24B4A; }
+  .err-msg { font-size: 11px; color: #E24B4A; margin-top: 2px; display: none; }
+  .field input.error ~ .err-msg { display: block; }
+  .hint { font-size: 11px; color: #888780; margin-top: 2px; }
+  .info-btn { width: 15px; height: 15px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.22); background: #f5f5f4; color: #5f5e5a; font-size: 9px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; cursor: default; flex-shrink: 0; position: relative; line-height: 1; }
+  .info-btn:hover .tooltip-pop { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .tooltip-pop { position: absolute; left: 50%; bottom: calc(100% + 7px); transform: translateX(-50%) translateY(3px); background: #1a1a19; color: #ffffff; font-size: 11px; font-weight: 400; padding: 6px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .15s, transform .15s; z-index: 400; text-transform: none; letter-spacing: 0; line-height: 1.4; }
+  .tooltip-pop::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1a1a19; }
+  .ac-wrap { position: relative; }
+  .ac-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #ffffff; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; z-index: 300; overflow: hidden; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.10); }
+  .ac-dropdown.open { display: block; }
+  .ac-item { padding: 9px 12px; font-size: 13px; color: #1a1a19; cursor: pointer; transition: background .1s; display: flex; flex-direction: column; gap: 2px; }
+  .ac-item:hover, .ac-item.focused { background: #f5f5f4; }
+  .ac-item .ac-sub { font-size: 11px; color: #888780; }
+  .ac-empty { padding: 10px 12px; font-size: 13px; color: #888780; font-style: italic; }
+  .addr-inline-wrap { position: relative; }
+  .addr-inline-wrap input { padding-right: 44px; }
+  .addr-action-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.22); background: #f5f5f4; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #5f5e5a; transition: background .15s; }
+  .addr-action-btn:hover { background: #eeece9; }
+  .rubrica-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; height: 38px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; background: #ffffff; font-size: 13px; color: #5f5e5a; cursor: pointer; white-space: nowrap; transition: background .15s; }
+  .rubrica-btn:hover { background: #f5f5f4; }
+  .rubrica-action-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+  .rub-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; background: none; border: 0.5px solid transparent; border-radius: 6px; padding: 5px 10px; transition: background .15s, border-color .15s, color .15s; white-space: nowrap; }
+  .rub-btn:disabled { cursor: default; opacity: .45; }
+  .rub-btn.state-add { color: #185FA5; }
+  .rub-btn.state-add:hover:not(:disabled) { background: #E6F1FB; border-color: #B5D4F4; }
+  .rub-btn.state-update { color: #854F0B; }
+  .rub-btn.state-update:hover:not(:disabled) { background: #FAEEDA; border-color: #FAC775; }
+  .rub-btn.state-saved { color: #0F6E56; background: #E1F5EE; border-color: #9FE1CB; cursor: default; pointer-events: none; }
+  .rub-btn.state-saved-update { color: #3B6D11; background: #EAF3DE; border-color: #C0DD97; cursor: default; pointer-events: none; }
+  .toggle-row { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-radius: 8px; background: #f5f5f4; border: 0.5px solid rgba(0,0,0,0.12); cursor: pointer; user-select: none; transition: border-color .15s; }
+  .toggle-row:hover { border-color: rgba(0,0,0,0.22); }
+  .toggle-row input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; accent-color: #185FA5; flex-shrink: 0; }
+  .toggle-label { font-size: 13px; color: #1a1a19; flex: 1; }
+  .toggle-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+  .priv-top-toggle { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.12); background: #f5f5f4; cursor: pointer; user-select: none; }
+  .priv-top-toggle input { width: 14px; height: 14px; accent-color: #185FA5; cursor: pointer; flex-shrink: 0; }
+  .priv-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+  .snc-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .snc-row input[type=checkbox] { width: 13px; height: 13px; accent-color: #185FA5; cursor: pointer; }
+  .snc-row label { font-size: 11px; color: #5f5e5a; cursor: pointer; }
+  .sdiv { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+  .sdiv span { font-size: 11px; color: #888780; white-space: nowrap; }
+  .sdiv hr { flex: 1; border: none; border-top: 0.5px solid rgba(0,0,0,0.12); }
+  #billing-section { display: none; }
+  #billing-section.visible { display: block; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: #ffffff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.12); width: 580px; max-width: 96vw; overflow: visible; }
+  .modal-header { padding: 16px 24px; border-bottom: 0.5px solid rgba(0,0,0,0.12); }
+  .modal-title { font-size: 15px; font-weight: 500; color: #1a1a19; text-align: center; }
+  .modal-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; overflow: visible; }
+  .modal-footer { padding: 14px 24px; border-top: 0.5px solid rgba(0,0,0,0.12); display: flex; gap: 10px; }
+  .modal-footer .btn-ghost, .modal-footer .btn-primary { flex: 1; }
+  .rubrica-search-wrap { position: relative; }
+  .rubrica-search-wrap input { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 0.5px solid rgba(0,0,0,0.22); border-radius: 8px; font-size: 14px; color: #1a1a19; background: #ffffff; outline: none; transition: border-color .15s, box-shadow .15s; }
+  .rubrica-search-wrap input:focus { border: 1.5px solid #378ADD; box-shadow: 0 0 0 3px rgba(55,138,221,.12); }
+  .rubrica-search-wrap input::placeholder { color: #888780; }
+  .rubrica-search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #888780; pointer-events: none; }
+  .rubrica-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+  .rubrica-list-empty { padding: 24px; text-align: center; font-size: 13px; color: #888780; font-style: italic; }
+  .rubrica-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 8px; cursor: pointer; border: 1.5px solid transparent; transition: background .1s, border-color .1s; }
+  .rubrica-item:hover { background: #f5f5f4; }
+  .rubrica-item.selected { border-color: #378ADD; background: #E6F1FB; }
+  .rubrica-avatar { width: 34px; height: 34px; border-radius: 50%; background: #E6F1FB; color: #0C447C; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .rubrica-item-name { font-size: 13px; font-weight: 500; color: #1a1a19; }
+  .rubrica-item-sub { font-size: 11px; color: #888780; margin-top: 2px; }
+  .btn-ghost { height: 36px; padding: 0 16px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.22); background: transparent; font-size: 13px; color: #5f5e5a; cursor: pointer; transition: background .15s; }
+  .btn-ghost:hover { background: #f5f5f4; }
+  .btn-primary { height: 36px; padding: 0 18px; border-radius: 8px; border: none; background: #185FA5; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; }
+  .btn-primary:hover { background: #0C447C; }
+  .btn-primary:disabled { background: #B5D4F4; cursor: default; }
+  @media (max-width: 540px) { .col2, .addr-civic { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page-wrapper">
+  <p class="page-title">Indirizzo di spedizione</p>
+  <div class="step-card">
+    <div class="step-header">
+      <div class="step-badge">1</div>
+      <span class="step-title">Indirizzo di spedizione</span>
+      <button class="rubrica-btn" onclick="openRubricaModal()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Cerca in rubrica
+      </button>
+    </div>
+    <div class="step-body">
+      <label class="priv-top-toggle" for="ship-private">
+        <input type="checkbox" id="ship-private" onchange="togglePrivate()">
+        <div style="flex:1">
+          <div style="font-size:13px;color:#1a1a19">Destinatario privato</div>
+          <div class="priv-sub">Nascondi il campo nome attività</div>
+        </div>
+      </label>
+      <div class="col2">
+        <div class="field">
+          <label>Nome e Cognome <span class="req">*</span>
+            <span class="info-btn">i<span class="tooltip-pop">Nome che il corriere trova sul citofono</span></span>
+          </label>
+          <input type="text" id="ship-name" placeholder="es. Mario Rossi" oninput="onShipChange()">
+        </div>
+        <div class="field">
+          <label>Riferimento cliente <span class="opt">(opzionale)</span></label>
+          <input type="text" id="ship-ref" placeholder="es. CLI-0042" oninput="onShipChange()">
+        </div>
+      </div>
+      <div class="field" id="ship-azienda-wrap">
+        <label>Nome attività <span class="req">*</span>
+          <span class="info-btn">i<span class="tooltip-pop">Nome visibile dal corriere lato strada</span></span>
+        </label>
+        <input type="text" id="ship-azienda" placeholder="es. Bar Centrale" oninput="onShipChange()">
+      </div>
+      <div class="field ac-wrap">
+        <label>Indirizzo <span class="req">*</span></label>
+        <div class="addr-inline-wrap">
+          <input type="text" id="ship-addr-input" placeholder="es. Via Roma, Longarone" autocomplete="off"
+            oninput="addrSearch(this.value)" onblur="addrBlur()" onkeydown="addrKey(event)">
+          <button class="addr-action-btn" id="ship-addr-btn" onclick="openAddrModal('ship')" title="Inserisci indirizzo manualmente">
+            <span id="ship-addr-btn-icon">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </span>
+          </button>
+        </div>
+        <div class="ac-dropdown" id="ac-addr"></div>
+        <span class="hint">Digita per cercare o usa il pulsante per inserire manualmente</span>
+      </div>
+      <div class="col2">
+        <div class="field">
+          <label>Email <span class="opt">(opzionale)</span></label>
+          <input type="email" id="ship-email" placeholder="es. mario.rossi@email.it" oninput="onShipChange()">
+        </div>
+        <div class="field">
+          <label>Telefono <span class="opt">(opzionale)</span></label>
+          <input type="tel" id="ship-phone" placeholder="es. 3391234567" oninput="onShipChange()">
+        </div>
+      </div>
+      <div class="rubrica-action-wrap">
+        <button class="rub-btn state-add" id="rub-action-btn" onclick="doRubricaAction()" disabled>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" id="rub-action-icon"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span id="rub-action-label">Aggiungi in rubrica</span>
+        </button>
+      </div>
+    </div>
+    <div style="padding:0 20px 18px">
+      <label class="toggle-row" for="billing-toggle">
+        <input type="checkbox" id="billing-toggle" onchange="toggleBilling(this)">
+        <div style="flex:1">
+          <div class="toggle-label">Aggiungi informazioni di fatturazione</div>
+          <div class="toggle-sub">Compila se il destinatario fattura è diverso o richiede dati fiscali</div>
+        </div>
+      </label>
+    </div>
+  </div>
+  <div class="step-card" id="billing-section">
+    <div class="step-header">
+      <div class="step-badge">2</div>
+      <span class="step-title">Informazioni di fatturazione</span>
+    </div>
+    <div class="step-body">
+      <div class="col2">
+        <div class="field">
+          <label>Nome e Cognome <span class="req">*</span>
+            <span class="info-btn">i<span class="tooltip-pop">Nome che il corriere trova sul citofono</span></span>
+          </label>
+          <input type="text" id="bill-name" placeholder="es. Mario Rossi">
+        </div>
+        <div class="field">
+          <label>Riferimento cliente <span class="opt">(opzionale)</span></label>
+          <input type="text" id="bill-ref" placeholder="es. CLI-0042">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ragione sociale <span class="req">*</span></label>
+        <input type="text" id="bill-azienda" placeholder="es. Bar Centrale di Rossi Mario">
+      </div>
+      <div class="field ac-wrap">
+        <label>Indirizzo <span class="req">*</span></label>
+        <div class="addr-inline-wrap">
+          <input type="text" id="bill-addr" placeholder="es. Via Roma, Milano" autocomplete="off"
+            oninput="billAddrSearch(this.value)" onblur="billAddrBlur()" onkeydown="billAddrKey(event)">
+          <div class="ac-dropdown" id="ac-bill-addr"></div>
+          <span class="hint">Digita per cercare o usa il pulsante per inserire manualmente</span>
+          <button class="addr-action-btn" id="bill-addr-btn" onclick="openAddrModal('bill')" title="Inserisci indirizzo">
+            <span id="bill-addr-btn-icon">
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="col2">
+        <div class="field">
+          <label>Email <span class="opt">(opzionale)</span></label>
+          <input type="email" id="bill-email" placeholder="es. fatture@azienda.it">
+        </div>
+        <div class="field">
+          <label>Telefono <span class="opt">(opzionale)</span></label>
+          <input type="tel" id="bill-phone" placeholder="es. 3391234567">
+        </div>
+      </div>
+      <div class="sdiv"><hr><span>Dati fiscali — opzionali</span><hr></div>
+      <div class="col2">
+        <div class="field"><label>Partita IVA</label><input type="text" id="bill-piva" placeholder="es. 12345678901"></div>
+        <div class="field"><label>Codice fiscale</label><input type="text" id="bill-cf" placeholder="es. RSSMRA80A01H501Z"></div>
+      </div>
+      <div class="col2">
+        <div class="field"><label>Codice SDI</label><input type="text" id="bill-sdi" placeholder="es. M5UXCR1"></div>
+        <div class="field"><label>PEC</label><input type="email" id="bill-pec" placeholder="pec@azienda.it"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL indirizzo -->
+<div class="modal-overlay" id="addr-modal-overlay" onclick="handleAddrOverlay(event)">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">Modifica indirizzo</div></div>
+    <div class="modal-body">
+      <div class="addr-civic">
+        <div class="field">
+          <label>Via / Strada <span class="req">*</span></label>
+          <input type="text" id="m-street" placeholder="es. Via Roma">
+        </div>
+        <div class="field">
+          <label>N. civico <span class="req">*</span></label>
+          <input type="text" id="m-civic" placeholder="es. 1 o km 4,3" oninput="syncSncCheck()">
+          <div class="snc-row">
+            <input type="checkbox" id="m-snc" onchange="toggleSnc()">
+            <label for="m-snc">Senza numero civico (SNC)</label>
+          </div>
+        </div>
+      </div>
+      <div class="col2">
+        <div class="field">
+          <label>Unità <span class="opt">(opzionale)</span></label>
+          <input type="text" id="m-unit" placeholder="es. interno 3">
+        </div>
+        <div class="field">
+          <label>CAP <span class="req">*</span></label>
+          <input type="text" id="m-cap" placeholder="es. 32013">
+        </div>
+      </div>
+      <div class="col2">
+        <div class="field ac-wrap">
+          <label>Città <span class="req">*</span></label>
+          <input type="text" id="m-city" placeholder="es. Longarone" autocomplete="off"
+            oninput="acSearch('city',this.value)" onblur="acBlur('city')" onkeydown="acKey(event,'city')">
+          <div class="ac-dropdown" id="ac-city"></div>
+          <span class="err-msg">Seleziona una città dall'elenco</span>
+        </div>
+        <div class="field ac-wrap">
+          <label>Provincia <span class="req">*</span></label>
+          <input type="text" id="m-prov" placeholder="es. Belluno" autocomplete="off"
+            oninput="acSearch('prov',this.value)" onblur="acBlur('prov')" onkeydown="acKey(event,'prov')">
+          <div class="ac-dropdown" id="ac-prov"></div>
+          <span class="err-msg">Seleziona una provincia dall'elenco</span>
+        </div>
+      </div>
+      <div class="col2">
+        <div class="field ac-wrap">
+          <label>Regione <span class="req">*</span></label>
+          <input type="text" id="m-region" placeholder="es. Veneto" autocomplete="off"
+            oninput="acSearch('region',this.value)" onblur="acBlur('region')" onkeydown="acKey(event,'region')">
+          <div class="ac-dropdown" id="ac-region"></div>
+          <span class="err-msg">Seleziona una regione dall'elenco</span>
+        </div>
+        <div class="field ac-wrap">
+          <label>Paese <span class="req">*</span></label>
+          <input type="text" id="m-country" placeholder="es. Italia" autocomplete="off"
+            oninput="acSearch('country',this.value)" onblur="acBlur('country')" onkeydown="acKey(event,'country')">
+          <div class="ac-dropdown" id="ac-country"></div>
+          <span class="err-msg">Seleziona un paese dall'elenco</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeAddrModal()">Annulla</button>
+      <button class="btn-primary" onclick="applyAddrModal()">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL rubrica -->
+<div class="modal-overlay" id="rubrica-modal-overlay" onclick="handleRubricaOverlay(event)">
+  <div class="modal" style="width:540px">
+    <div class="modal-header"><div class="modal-title">Cerca in rubrica</div></div>
+    <div class="modal-body" style="gap:12px">
+      <div class="rubrica-search-wrap">
+        <svg class="rubrica-search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4" stroke="currentColor" stroke-width="1.3"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        <input type="text" id="rubrica-search-input" placeholder="Cerca per nome, cognome o attività..." oninput="filterRubrica(this.value)" autocomplete="off">
+      </div>
+      <div class="rubrica-list" id="rubrica-list"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeRubricaModal()">Annulla</button>
+      <button class="btn-primary" id="rubrica-confirm-btn" onclick="confirmRubrica()" disabled>Usa questo indirizzo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var GEO=[{city:'Torino',prov:'Torino',region:'Piemonte',country:'Italia'},{city:'Milano',prov:'Milano',region:'Lombardia',country:'Italia'},{city:'Roma',prov:'Roma',region:'Lazio',country:'Italia'},{city:'Napoli',prov:'Napoli',region:'Campania',country:'Italia'},{city:'Bologna',prov:'Bologna',region:'Emilia-Romagna',country:'Italia'},{city:'Firenze',prov:'Firenze',region:'Toscana',country:'Italia'},{city:'Venezia',prov:'Venezia',region:'Veneto',country:'Italia'},{city:'Longarone',prov:'Belluno',region:'Veneto',country:'Italia'},{city:'Belluno',prov:'Belluno',region:'Veneto',country:'Italia'},{city:'Verona',prov:'Verona',region:'Veneto',country:'Italia'},{city:'Padova',prov:'Padova',region:'Veneto',country:'Italia'},{city:'Genova',prov:'Genova',region:'Liguria',country:'Italia'},{city:'Palermo',prov:'Palermo',region:'Sicilia',country:'Italia'},{city:'Bari',prov:'Bari',region:'Puglia',country:'Italia'},{city:'Alessandria',prov:'Alessandria',region:'Piemonte',country:'Italia'},{city:'Brescia',prov:'Brescia',region:'Lombardia',country:'Italia'},{city:'Bergamo',prov:'Bergamo',region:'Lombardia',country:'Italia'},{city:'Trento',prov:'Trento',region:'Trentino-Alto Adige',country:'Italia'},{city:'Bolzano',prov:'Bolzano',region:'Trentino-Alto Adige',country:'Italia'},{city:'Trieste',prov:'Trieste',region:'Friuli-Venezia Giulia',country:'Italia'},{city:'Parigi',prov:'Île-de-France',region:'Île-de-France',country:'Francia'},{city:'Berlino',prov:'Berlino',region:'Berlino',country:'Germania'},{city:'Madrid',prov:'Madrid',region:'Comunidad de Madrid',country:'Spagna'},{city:'Amsterdam',prov:'Noord-Holland',region:'Noord-Holland',country:'Paesi Bassi'},{city:'Vienna',prov:'Vienna',region:'Vienna',country:'Austria'},{city:'Zurigo',prov:'Zurigo',region:'Zurigo',country:'Svizzera'},{city:'Londra',prov:'Greater London',region:'Inghilterra',country:'Regno Unito'},{city:'New York',prov:'New York',region:'New York',country:'Stati Uniti'},{city:'Tokyo',prov:'Tokyo',region:'Kantō',country:'Giappone'},{city:'Dubai',prov:'Dubai',region:'Dubai',country:'Emirati Arabi Uniti'}];
+var RUBRICA=[{name:'Mario Rossi',azienda:'Allabox srl',addr:'Via Roma 1, 32013 Longarone, Belluno, Italia',email:'mario.rossi@allabox.it',phone:'3391234567'},{name:'Laura Bianchi',azienda:'Tech Solutions srl',addr:'Via Garibaldi 42, 10100 Torino, Torino, Italia',email:'l.bianchi@tech.it',phone:'3481234567'},{name:'Giuseppe Verdi',azienda:'Logistica Nord srl',addr:'Via Manzoni 8, 20121 Milano, Milano, Italia',email:'g.verdi@lognord.it',phone:'3351234567'},{name:'Anna Ferrari',azienda:'',addr:'Corso Venezia 15, 20121 Milano, Milano, Italia',email:'anna.ferrari@email.it',phone:'3471234567'},{name:'Roberto Esposito',azienda:'Studio Esposito',addr:'Via Toledo 200, 80134 Napoli, Napoli, Italia',email:'r.esposito@studio.it',phone:'3461234567'},{name:'Chiara Conti',azienda:'Conti & Partners',addr:'Via del Corso 10, 00186 Roma, Roma, Italia',email:'c.conti@partners.it',phone:'3421234567'},{name:'Luca Martini',azienda:'',addr:'Piazza della Repubblica 5, 50123 Firenze, Firenze, Italia',email:'luca.martini@gmail.com',phone:'3411234567'}];
+var billAddrResults=[],billAddrFocusIdx=-1;var rubricaState=null,hasChangesAfterSave=false,validated={city:false,prov:false,region:false,country:false},acFocusIdx={city:-1,prov:-1,region:-1,country:-1,addr:-1},addrResults=[],modalAddrTarget='ship',rubricaSelectedIdx=null;
+function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
+function getVal(r,t){return t==='city'?r.city:t==='prov'?r.prov:t==='region'?r.region:r.country;}
+function getSub(r,t){return t==='city'?r.prov+', '+r.country:t==='prov'?r.region+', '+r.country:t==='region'?r.country:'';}
+function plusIcon(){return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';}
+function refreshIcon(){return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M13 8A5 5 0 1 1 8 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M13 3v5h-5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+function checkIcon(){return '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 8l4 4 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';}
+function renderRubBtn(){var btn=document.getElementById('rub-action-btn'),lbl=document.getElementById('rub-action-label'),ico=document.getElementById('rub-action-icon'),valid=isShipValid(),isUpdate=(rubricaState==='from_rubrica'||rubricaState==='saved_new'||rubricaState==='saved_update');if(rubricaState==='saved_new'&&!hasChangesAfterSave){btn.className='rub-btn state-saved';btn.disabled=true;ico.innerHTML=checkIcon();lbl.textContent='Aggiunto in rubrica';return;}if(rubricaState==='saved_update'&&!hasChangesAfterSave){btn.className='rub-btn state-saved-update';btn.disabled=true;ico.innerHTML=checkIcon();lbl.textContent='Rubrica aggiornata';return;}if(isUpdate){btn.className='rub-btn state-update';btn.disabled=(!valid||!hasChangesAfterSave);ico.innerHTML=refreshIcon();lbl.textContent='Aggiorna in rubrica';}else{btn.className='rub-btn state-add';btn.disabled=!valid;ico.innerHTML=plusIcon();lbl.textContent='Aggiungi in rubrica';}}
+function doRubricaAction(){var isUpdate=(rubricaState==='from_rubrica'||rubricaState==='saved_new'||rubricaState==='saved_update');rubricaState=isUpdate?'saved_update':'saved_new';hasChangesAfterSave=false;renderRubBtn();}
+function isShipValid(){var name=document.getElementById('ship-name').value.trim(),az=document.getElementById('ship-azienda').value.trim(),addr=document.getElementById('ship-addr-input').value.trim(),isPrivate=document.getElementById('ship-private').checked;return !!(name&&addr&&(isPrivate||az));}
+function onShipChange(){hasChangesAfterSave=true;renderRubBtn();updateShipAddrBtn();}
+function addrSearch(val){onShipChange();if(!val||val.length<2){addrCloseDD();return;}var q=norm(val),streets=['Via Roma','Via Garibaldi','Via Manzoni','Corso Italia','Via Dante','Viale Europa','Via Verdi','Via Leopardi','Strada Provinciale','Via Nazionale','Corso Vittorio Emanuele'],suggestions=[];GEO.forEach(function(g){streets.forEach(function(s){var full=s+', '+g.city;if(norm(full).indexOf(q)>=0)suggestions.push({label:full,sub:g.prov+', '+g.country,geo:g,street:s});});});suggestions=suggestions.slice(0,7);addrResults=suggestions;var dd=document.getElementById('ac-addr');acFocusIdx.addr=-1;if(!suggestions.length){dd.innerHTML='<div class="ac-empty">Nessun risultato</div>';dd.classList.add('open');return;}dd.innerHTML=suggestions.map(function(r,i){return'<div class="ac-item" data-idx="'+i+'" onmousedown="addrSelect('+i+')"><span>'+r.label+'</span><span class="ac-sub">'+r.sub+'</span></div>';}).join('');dd.classList.add('open');}
+function addrSelect(idx){var r=addrResults[idx];if(!r)return;document.getElementById('ship-addr-input').value=r.label;addrCloseDD();onShipChange();}
+function addrBlur(){setTimeout(addrCloseDD,180);}
+function addrCloseDD(){document.getElementById('ac-addr').classList.remove('open');}
+function addrKey(e){var dd=document.getElementById('ac-addr'),items=dd.querySelectorAll('.ac-item');if(!dd.classList.contains('open')||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();acFocusIdx.addr=Math.min(acFocusIdx.addr+1,items.length-1);}else if(e.key==='ArrowUp'){e.preventDefault();acFocusIdx.addr=Math.max(acFocusIdx.addr-1,0);}else if(e.key==='Enter'&&acFocusIdx.addr>=0){e.preventDefault();addrSelect(acFocusIdx.addr);return;}else if(e.key==='Escape'){addrCloseDD();return;}items.forEach(function(el,i){el.classList.toggle('focused',i===acFocusIdx.addr);});}
+function updateShipAddrBtn(){var val=document.getElementById('ship-addr-input').value.trim(),icon=document.getElementById('ship-addr-btn-icon'),btn=document.getElementById('ship-addr-btn');if(val){icon.innerHTML='<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';btn.title='Modifica indirizzo manualmente';}else{icon.innerHTML='<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';btn.title='Inserisci indirizzo manualmente';}}
+function openAddrModal(target){modalAddrTarget=target;['street','civic','unit','cap'].forEach(function(f){var el=document.getElementById('m-'+f);el.value='';el.classList.remove('error');});document.getElementById('m-snc').checked=false;document.getElementById('m-civic').disabled=false;['city','prov','region','country'].forEach(function(t){validated[t]=false;var el=document.getElementById('m-'+t);el.value='';el.classList.remove('valid','error');acClose(t);});document.getElementById('addr-modal-overlay').classList.add('open');}
+function closeAddrModal(){document.getElementById('addr-modal-overlay').classList.remove('open');}
+function handleAddrOverlay(e){if(e.target===document.getElementById('addr-modal-overlay'))closeAddrModal();}
+function toggleSnc(){var cb=document.getElementById('m-snc'),civic=document.getElementById('m-civic');if(cb.checked){civic.value='SNC';civic.disabled=true;civic.classList.remove('error');}else{civic.value='';civic.disabled=false;civic.focus();}}
+function syncSncCheck(){document.getElementById('m-snc').checked=document.getElementById('m-civic').value.trim().toUpperCase()==='SNC';}
+function applyAddrModal(){var ok=true,street=document.getElementById('m-street').value.trim(),civic=document.getElementById('m-civic').value.trim(),cap=document.getElementById('m-cap').value.trim();if(!street){document.getElementById('m-street').classList.add('error');ok=false;}if(!civic){document.getElementById('m-civic').classList.add('error');ok=false;}if(!cap){document.getElementById('m-cap').classList.add('error');ok=false;}['city','prov','region','country'].forEach(function(t){var inp=document.getElementById('m-'+t);if(!validated[t]||!inp.value.trim()){inp.classList.add('error');inp.classList.remove('valid');ok=false;}});if(!ok)return;var city=document.getElementById('m-city').value.trim(),prov=document.getElementById('m-prov').value.trim(),country=document.getElementById('m-country').value.trim(),line=[street+' '+civic,cap+' '+city,prov,country].join(', ');if(modalAddrTarget==='ship'){document.getElementById('ship-addr-input').value=line;onShipChange();}else{document.getElementById('bill-addr').value=line;updateBillAddrBtn();}closeAddrModal();}
+function billAddrSearch(val){
+  updateBillAddrBtn();
+  if(!val||val.length<2){billAddrCloseDD();return;}
+  var q=norm(val),streets=['Via Roma','Via Garibaldi','Via Manzoni','Corso Italia','Via Dante','Viale Europa','Via Verdi','Via Leopardi','Strada Provinciale','Via Nazionale','Corso Vittorio Emanuele'],suggestions=[];
+  GEO.forEach(function(g){streets.forEach(function(s){var full=s+', '+g.city;if(norm(full).indexOf(q)>=0)suggestions.push({label:full,sub:g.prov+', '+g.country});});});
+  suggestions=suggestions.slice(0,7);
+  billAddrResults=suggestions;
+  var dd=document.getElementById('ac-bill-addr');
+  billAddrFocusIdx=-1;
+  if(!suggestions.length){dd.innerHTML='<div class="ac-empty">Nessun risultato</div>';dd.classList.add('open');return;}
+  dd.innerHTML=suggestions.map(function(r,i){return'<div class="ac-item" data-idx="'+i+'" onmousedown="billAddrSelect('+i+')"><span>'+r.label+'</span><span class="ac-sub">'+r.sub+'</span></div>';}).join('');
+  dd.classList.add('open');
+}
+function billAddrSelect(idx){
+  var r=billAddrResults[idx];if(!r)return;
+  document.getElementById('bill-addr').value=r.label;
+  billAddrCloseDD();updateBillAddrBtn();
+}
+function billAddrBlur(){setTimeout(billAddrCloseDD,180);}
+function billAddrCloseDD(){document.getElementById('ac-bill-addr').classList.remove('open');}
+function billAddrKey(e){
+  var dd=document.getElementById('ac-bill-addr'),items=dd.querySelectorAll('.ac-item');
+  if(!dd.classList.contains('open')||!items.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();billAddrFocusIdx=Math.min(billAddrFocusIdx+1,items.length-1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();billAddrFocusIdx=Math.max(billAddrFocusIdx-1,0);}
+  else if(e.key==='Enter'&&billAddrFocusIdx>=0){e.preventDefault();billAddrSelect(billAddrFocusIdx);return;}
+  else if(e.key==='Escape'){billAddrCloseDD();return;}
+  items.forEach(function(el,i){el.classList.toggle('focused',i===billAddrFocusIdx);});
+}
+function updateBillAddrBtn(){var val=document.getElementById('bill-addr').value.trim(),icon=document.getElementById('bill-addr-btn-icon'),btn=document.getElementById('bill-addr-btn');if(val){icon.innerHTML='<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M11 2l3 3-9 9H2v-3l9-9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';btn.title='Modifica indirizzo';}else{icon.innerHTML='<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';btn.title='Inserisci indirizzo';}}
+function acSearch(type,val){validated[type]=false;var inp=document.getElementById('m-'+type);if(inp)inp.classList.remove('valid','error');if(!val||val.length<1){acClose(type);return;}var q=norm(val),results=[],seen={};GEO.forEach(function(r){var k=getVal(r,type);if(!seen[k]&&norm(k).indexOf(q)===0){seen[k]=true;results.push(r);}});GEO.forEach(function(r){var k=getVal(r,type);if(!seen[k]&&norm(k).indexOf(q)>0){seen[k]=true;results.push(r);}});results=results.slice(0,6);var dd=document.getElementById('ac-'+type);acFocusIdx[type]=-1;if(!results.length){dd.innerHTML='<div class="ac-empty">Nessun risultato</div>';dd.classList.add('open');return;}dd.innerHTML=results.map(function(r,i){var main=getVal(r,type),sub=getSub(r,type);return'<div class="ac-item" onmousedown="acSelect(\''+type+'\','+i+')"><span>'+main+'</span>'+(sub?'<span class="ac-sub">'+sub+'</span>':'')+'</div>';}).join('');dd._results=results;dd.classList.add('open');}
+function acSelect(type,idx){var dd=document.getElementById('ac-'+type),r=dd._results[idx];if(!r)return;document.getElementById('m-city').value=r.city;document.getElementById('m-prov').value=r.prov;document.getElementById('m-region').value=r.region;document.getElementById('m-country').value=r.country;['city','prov','region','country'].forEach(function(t){validated[t]=true;var el=document.getElementById('m-'+t);if(el){el.classList.remove('error');el.classList.add('valid');}acClose(t);});}
+function acClose(type){var dd=document.getElementById('ac-'+type);if(dd)dd.classList.remove('open');acFocusIdx[type]=-1;}
+function acBlur(type){setTimeout(function(){acClose(type);var inp=document.getElementById('m-'+type);if(inp&&inp.value&&!validated[type]){inp.classList.add('error');inp.classList.remove('valid');}},180);}
+function acKey(e,type){var dd=document.getElementById('ac-'+type);if(!dd)return;var items=dd.querySelectorAll('.ac-item');if(!dd.classList.contains('open')||!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();acFocusIdx[type]=Math.min(acFocusIdx[type]+1,items.length-1);}else if(e.key==='ArrowUp'){e.preventDefault();acFocusIdx[type]=Math.max(acFocusIdx[type]-1,0);}else if(e.key==='Enter'&&acFocusIdx[type]>=0){e.preventDefault();acSelect(type,acFocusIdx[type]);return;}else if(e.key==='Escape'){acClose(type);return;}items.forEach(function(el,i){el.classList.toggle('focused',i===acFocusIdx[type]);});}
+function openRubricaModal(){rubricaSelectedIdx=null;document.getElementById('rubrica-search-input').value='';document.getElementById('rubrica-confirm-btn').disabled=true;renderRubricaList(RUBRICA);document.getElementById('rubrica-modal-overlay').classList.add('open');setTimeout(function(){document.getElementById('rubrica-search-input').focus();},100);}
+function closeRubricaModal(){document.getElementById('rubrica-modal-overlay').classList.remove('open');}
+function handleRubricaOverlay(e){if(e.target===document.getElementById('rubrica-modal-overlay'))closeRubricaModal();}
+function filterRubrica(q){if(!q){renderRubricaList(RUBRICA);return;}var nq=norm(q);renderRubricaList(RUBRICA.filter(function(r){return norm(r.name).indexOf(nq)>=0||norm(r.azienda||'').indexOf(nq)>=0;}));}
+function renderRubricaList(list){var el=document.getElementById('rubrica-list');if(!list.length){el.innerHTML='<div class="rubrica-list-empty">Nessun indirizzo trovato</div>';return;}el.innerHTML=list.map(function(r){var idx=RUBRICA.indexOf(r),initials=r.name.split(' ').map(function(w){return w[0]||'';}).slice(0,2).join('').toUpperCase();return'<div class="rubrica-item" id="ri-'+idx+'" onclick="selectRubricaItem('+idx+')"><div class="rubrica-avatar">'+initials+'</div><div style="flex:1;min-width:0"><div class="rubrica-item-name">'+r.name+(r.azienda?' — <span style="font-weight:400">'+r.azienda+'</span>':'')+'</div><div class="rubrica-item-sub">'+r.addr+'</div></div></div>';}).join('');}
+function selectRubricaItem(idx){rubricaSelectedIdx=idx;document.querySelectorAll('.rubrica-item').forEach(function(el){el.classList.remove('selected');});var el=document.getElementById('ri-'+idx);if(el)el.classList.add('selected');document.getElementById('rubrica-confirm-btn').disabled=false;}
+function confirmRubrica(){if(rubricaSelectedIdx===null)return;var r=RUBRICA[rubricaSelectedIdx];document.getElementById('ship-name').value=r.name;document.getElementById('ship-azienda').value=r.azienda||'';document.getElementById('ship-addr-input').value=r.addr;document.getElementById('ship-email').value=r.email||'';document.getElementById('ship-phone').value=r.phone||'';rubricaState='from_rubrica';hasChangesAfterSave=false;updateShipAddrBtn();renderRubBtn();closeRubricaModal();}
+function togglePrivate(){var cb=document.getElementById('ship-private');document.getElementById('ship-azienda-wrap').style.display=cb.checked?'none':'flex';onShipChange();}
+function toggleBilling(cb){var sec=document.getElementById('billing-section');if(cb.checked){sec.classList.add('visible');copyShipToBill();setTimeout(function(){sec.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}else{sec.classList.remove('visible');}}
+function copyShipToBill(){['name','ref','email','phone'].forEach(function(f){document.getElementById('bill-'+f).value=document.getElementById('ship-'+f).value||'';});document.getElementById('bill-addr').value=document.getElementById('ship-addr-input').value||'';document.getElementById('bill-azienda').value=document.getElementById('ship-azienda').value||'';updateBillAddrBtn();}
+renderRubBtn();
+</script>
+</body>
+</html>
